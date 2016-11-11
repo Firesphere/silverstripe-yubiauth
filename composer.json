@@ -1,0 +1,24 @@
+{
+  "name": "Firesphere/yubiauth",
+  "description": "Enable authentication with a Yubikey",
+  "type": "silverstripe-module",
+  "keywords": ["silverstripe", "Yubikey"],
+  "authors": [{
+    "name": "Simon Erkelens",
+    "email": "simonerkelens@silverstripe.com"
+  }],
+  "require": {
+    "silverstripe/framework": "~3.*",
+    "silverstripe/cms": "~3.*"
+    "enygma/yubikey": "dev-master"
+  },
+  "extra": {
+    "installer-name": "yubiauth"
+  },
+  "support": {
+    "issues": "https://github.com/firesphere/silverstripe-yubiauth/issues",
+    "source": "https://github.com/firesphere/silverstripe-yubiauth"
+  },
+  "target-dir": "yubiauth"
+
+}
