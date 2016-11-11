@@ -1,5 +1,5 @@
 {
-  "name": "Firesphere/yubiauth",
+  "name": "firesphere/yubiauth",
   "description": "Enable authentication with a Yubikey",
   "type": "silverstripe-module",
   "keywords": [
