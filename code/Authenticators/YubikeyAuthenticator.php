@@ -19,7 +19,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
         // If we know the member, and it's YubiAuth enabled, continue.
-        if ($member && $member instanceof Member && $member->YubiAuthEnabled && $data['Yubikey'] !== '') {
+        if ($member && $member instanceof Member && $data['Yubikey'] !== '') {
             $url = self::config()->get('AuthURL');
             $clientID = YUBIAUTH_CLIENTID;
             $apiKey = YUBIAUTH_APIKEY;
@@ -34,6 +34,11 @@ class YubikeyAuthenticator extends MemberAuthenticator
             $result = $service->check($data['Yubikey']);
 
             if ($result->success() === true) {
+                // If the member does not have the YubiAuth enabled, but is able to use a YubiKey, let's enable YubiAuth
+                if(!$member->YubiAuthEnabled) {
+                    $member->YubiAuthEnabled = true;
+                    $member->write();
+                }
                 return $member;
             }
         } elseif($member && $member instanceof Member && !$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
