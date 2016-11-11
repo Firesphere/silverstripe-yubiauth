@@ -2,7 +2,7 @@
 
 Install the module using composer:
 ```
-composer require Firesphere\yubiauth
+composer require firesphere\yubiauth
 ```
 
 Configure your ClientID and API key in your environment file.
