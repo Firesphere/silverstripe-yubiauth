@@ -1,9 +1,19 @@
 <?php
+namespace Firesphere\YubiAuth;
+
+use FieldList;
+use FormAction;
+use HiddenField;
+use Member;
+use MemberLoginForm;
+use PasswordField;
+use TextField;
+use Injector;
 
 class YubikeyLoginForm extends MemberLoginForm
 {
 
-    protected $authenticator_class = 'YubikeyAuthenticator';
+    protected $authenticator_class = 'Firesphere\\YubiAuth\\YubikeyAuthenticator';
 
     /**
      * @inheritdoc
