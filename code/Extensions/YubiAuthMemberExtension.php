@@ -4,12 +4,17 @@ namespace Firesphere\YubiAuth;
 use CheckboxField;
 use DataExtension;
 use FieldList;
+use Member;
 use TextField;
 
 /**
  * Class YubiAuthMemberExtension
- *
+ * 
  * Enable yubikey authentication disabling temporarily
+ *
+ * @property Member|\Firesphere\YubiAuth\YubiAuthMemberExtension $owner
+ * @property boolean $YubiAuthEnabled
+ * @property string $Yubikey
  */
 class YubiAuthMemberExtension extends DataExtension
 {
