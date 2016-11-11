@@ -48,7 +48,10 @@ class YubiAuthMemberExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields) {
         $yubiField = TextField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
-        $yubiField->setReadonly(true); // Will be filled the first time the user uses his/her yubikey
+        if($this->owner->Yubikey) {
+            // Disable editing the field when a key is set, so it's harder to tamper with
+            $yubiField->setReadonly(true); // Will be filled the first time the user uses his/her yubikey
+        }
         $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION', 'Unique identifier string for the Yubikey'));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
