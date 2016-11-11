@@ -1,0 +1,10 @@
+en:
+  YubikeyAuthenticater:
+    FORMFIELDNAME: 'Yubikey Authentication'
+  YubikeyAuthenticator:
+    ENABLED: 'Yubikey Authentication Enabled'
+    ENABLEDDESCRIPTION: 'If the user is new and doesn''t have a Yubikey yet, you can disable the auth temporarily'
+    ERRORYUBIKEY: 'Yubikey error'
+    TITLE: 'Yubikey login'
+    YUBIKEY: 'Yubikey code'
+    YUBIKEYDESCRIPTION: 'Unique identifier string for the Yubikey'

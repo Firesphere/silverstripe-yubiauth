@@ -5,6 +5,7 @@ use Controller;
 use Form;
 use Member;
 use MemberAuthenticator;
+use ValidationResult;
 
 /**
  * Class YubikeyAuthenticator
@@ -35,7 +36,12 @@ class YubikeyAuthenticator extends MemberAuthenticator
             $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
             $yubiFingerprint = substr($yubiCode, 0, -32);
             // If the member has a yubikey ID set, compare it to the fingerprint.
+            $validationError = ValidationResult::create(false, _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey error'));
             if($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
+                if($form) {
+                    $form->sessionMessage($validationError->message(), 'bad');
+                }
+
                 return false; // Yubikey id doesn't match the member.
             }
             $url = self::config()->get('AuthURL');
@@ -49,12 +55,23 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
             if ($result->success() === true) {
                 self::updateMember($member, $yubiFingerprint);
+                if($member) {
+                    $member->registerSuccessfulLogin();
+                }
 
                 return $member;
+            } else {
+                if($form) {
+                    $form->sessionMessage($validationError->message(), 'bad');
+                }
+
             }
         } elseif ($member && $member instanceof Member && !$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
             return $member;
         }
+        if($member){
+            $member->registerFailedLogin();
+        } 
 
         return false;
     }

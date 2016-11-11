@@ -1,12 +1,13 @@
 <?php
 namespace Firesphere\YubiAuth;
 
+use CheckboxField;
 use FieldList;
-use FormAction;
 use HiddenField;
 use Member;
 use MemberLoginForm;
 use PasswordField;
+use Security;
 use TextField;
 use Injector;
 
@@ -37,17 +38,16 @@ class YubikeyLoginForm extends MemberLoginForm
                     PasswordField::create("Password", _t('Member.PASSWORD', 'Password')),
                     PasswordField::create("Yubikey", _t('YubikeyAuthenticater.FORMFIELDNAME', 'Yubikey Authentication'))
                 );
-            }
-            if (!$actions) {
-                $actions = FieldList::create(
-                    FormAction::create('dologin', _t('Member.BUTTONLOGIN', 'Log in'))
-                );
+                if (Security::config()->autologin_enabled) {
+                    $fields->push(CheckboxField::create(
+                        "Remember",
+                        _t('Member.REMEMBERME', "Remember me next time?")
+                    ));
+                }
             }
         }
 
         parent::__construct($controller, $name, $fields, $actions);
-
-
     }
 
 }
