@@ -24,6 +24,12 @@ Authenticator::unregister_authenticator('MemberAuthenticator');
 ```
 This is _not_ a good idea to do on a dev environment ;)
 
+## Requirements:
+
+* SilverStripe CMS ~3.1
+* SilverStripe Framework ~3.1
+* `enygma/yubikey` master
+
 ## Actual license
 
 This module is published under BSD 2-clause license, although these are not in the actual classes, the license does apply:
