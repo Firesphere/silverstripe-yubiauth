@@ -28,10 +28,19 @@ Authenticator::unregister_authenticator('MemberAuthenticator');
 ```
 This is _not_ a good idea to do on a dev environment ;)
 
+## Configuration
+
+The amount of days, or total amount of logins without Yubikey, are set in the config.yml. You can override it in your mysite config with the following setting:
+```
+Firesphere\YubiAuth\YubikeyAuthenticator:
+  MaxNoYubiLogin: 25
+  MaxNoYubiLoginDays: 5
+```
+
 ## Requirements:
 
-* SilverStripe CMS ~3.1
-* SilverStripe Framework ~3.1
+* SilverStripe CMS ~3.2
+* SilverStripe Framework ~3.2
 * `enygma/yubikey` master
 
 ## Actual license

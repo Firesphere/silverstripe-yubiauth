@@ -35,8 +35,6 @@ class YubikeyAuthenticator extends MemberAuthenticator
         $validationError = ValidationResult::create(false,
             _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
         if ($member && $member instanceof Member) {
-            $config = SiteConfig::current_site_config();
-
             // If we know the member, and it's YubiAuth enabled, continue.
             if ($member &&
                 ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
@@ -79,7 +77,8 @@ class YubikeyAuthenticator extends MemberAuthenticator
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 $member->NoYubikeyCount += 1;
                 $member->write();
-                if ($config->MaxNoYubiLogins > 0 && $config->MaxNoYubiLogins <= $member->NoYubikeyCount) {
+                $maxNoYubi = Config::inst()->get('YubikeyAuthenticator', 'MaxNoYubiLogin');
+                if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
                     if ($form) {
@@ -93,7 +92,9 @@ class YubikeyAuthenticator extends MemberAuthenticator
                 $date2 = new DateTime(date('Y-m-d'));
 
                 $diff = $date2->diff($date1)->format("%a");
-                if ($config->MaxNoYubiLoginDays > 0 && $diff >= $config->MaxNoYubiLoginDays) {
+                $maxNoYubiDays = Config::inst()->get('YubikeyAuthenticator', 'MaxNoYubiLoginDays');
+
+                if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
                     if ($form) {

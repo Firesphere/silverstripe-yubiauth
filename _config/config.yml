@@ -1,2 +1,4 @@
 Firesphere\YubiAuth\YubikeyAuthenticator:
   AuthURL: ''
+  MaxNoYubiLogin: 25
+  MaxNoYubiLoginDays: 5
