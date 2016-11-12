@@ -105,8 +105,8 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
     /**
      * @param Form $form
-     * @param $member
-     * @return null
+     * @param Member $member
+     * @return null|Member
      */
     public static function noYubiAuth(Form $form, $member)
     {
@@ -141,10 +141,10 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
-     * @param $data
-     * @param $member
-     * @param $validationError
-     * @return null
+     * @param array $data
+     * @param Member $member
+     * @param ValidationResult $validationError
+     * @return null|Member
      */
     public static function authenticate_yubikey($data, $member, $validationError)
     {
