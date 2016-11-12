@@ -35,6 +35,8 @@ class YubikeyAuthenticator extends MemberAuthenticator
         $validationError = ValidationResult::create(false,
             _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
         if ($member && $member instanceof Member) {
+            $config = SiteConfig::current_site_config();
+
             // If we know the member, and it's YubiAuth enabled, continue.
             if ($member &&
                 ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
@@ -48,7 +50,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
                         $form->sessionMessage($validationError->message(), 'bad');
                     }
 
-                    return false; // Yubikey id doesn't match the member.
+                    return null; // Yubikey id doesn't match the member.
                 }
                 $url = self::config()->get('AuthURL');
                 $clientID = YUBIAUTH_CLIENTID;
@@ -77,7 +79,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 $member->NoYubikeyCount += 1;
                 $member->write();
-                if (SiteConfig::current_site_config()->MaxNoYubiLogins > 0 && SiteConfig::current_site_config()->MaxNoYubiLogins <= $member->NoYubikeyCount) {
+                if ($config->MaxNoYubiLogins > 0 && $config->MaxNoYubiLogins <= $member->NoYubikeyCount) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
                     if ($form) {
@@ -85,13 +87,13 @@ class YubikeyAuthenticator extends MemberAuthenticator
                     }
                     $member->registerFailedLogin();
 
-                    return false;
+                    return null;
                 }
                 $date1 = new DateTime($member->Created);
                 $date2 = new DateTime(date('Y-m-d'));
 
                 $diff = $date2->diff($date1)->format("%a");
-                if (SiteConfig::current_site_config()->MaxNoYubiLoginDays > 0 && $diff >= SiteConfig::current_site_config()->MaxNoYubiLoginDays) {
+                if ($config->MaxNoYubiLoginDays > 0 && $diff >= $config->MaxNoYubiLoginDays) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
                     if ($form) {
@@ -99,7 +101,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
                     }
                     $member->registerFailedLogin();
 
-                    return false;
+                    return null;
 
                 }
 
@@ -113,7 +115,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
             $form->sessionMessage($validationError->message(), 'bad');
         }
 
-        return false;
+        return null;
     }
 
     /**

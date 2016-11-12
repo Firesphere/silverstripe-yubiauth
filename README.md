@@ -1,3 +1,7 @@
+## status
+[![Scrutinizer Status](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth)
+
+
 ## Usage
 
 Install the module using composer:
