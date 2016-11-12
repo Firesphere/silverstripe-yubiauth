@@ -44,6 +44,10 @@ Firesphere\YubiAuth\YubikeyAuthenticator:
 * SilverStripe Framework ~3.2
 * `enygma/yubikey` master
 
+## Test your yubikey
+
+https://demo.yubico.com/
+
 ## Actual license
 
 This module is published under BSD 2-clause license, although these are not in the actual classes, the license does apply:
