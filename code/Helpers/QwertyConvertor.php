@@ -27,6 +27,7 @@ class QwertyConvertor
      * A Yubi-string alsways starts with `cccccc`. If it's different, we have a different layout.
      * Dvorak is easy to detect. Azerty on the other hand, might be tricky.
      * Other conversion additions welcome.
+     *
      * @param string $yubiString
      *
      * @return string

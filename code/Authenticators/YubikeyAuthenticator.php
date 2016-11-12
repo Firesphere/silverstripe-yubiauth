@@ -43,7 +43,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
             ) {
                 return self::authenticate_yubikey($data, $member);
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
-                return self::noYubiAuth($form, $member);
+                return self::authenticate_noyubikey($form, $member);
             }
         }
         if ($member) {
@@ -76,7 +76,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
      * https://developers.yubico.com/yubikey-val/Getting_Started_Writing_Clients.html
      *
      * @param Member $member
-     * @param string $yubiString
+     * @param string $yubiString The Identifier String of the Yubikey
      */
     private static function updateMember($member, $yubiString)
     {
@@ -95,7 +95,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
     private static function updateForm($form, $validation = null)
     {
         if ($form) {
-            if($validation == null) {
+            if ($validation == null) {
                 // Default validation error.
                 $validation = ValidationResult::create(false,
                     _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
@@ -106,11 +106,14 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
+     * Handle login if the user did not enter a Yubikey string.
+     * Will break out and return NULL if the member should use their Yubikey
+     *
      * @param Form $form
      * @param Member $member
      * @return null|Member
      */
-    public static function noYubiAuth(Form $form, $member)
+    private static function authenticate_noyubikey(Form $form, $member)
     {
         $member->NoYubikeyCount += 1;
         $member->write();
@@ -143,12 +146,12 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
+     * Validate a member plus it's yubikey login. It compares the fingerprintt and after that, tries to validate the Yubikey string
      * @param array $data
      * @param Member $member
-     * @param ValidationResult $validationError
      * @return null|Member
      */
-    public static function authenticate_yubikey($data, $member)
+    private static function authenticate_yubikey($data, $member)
     {
         $form = self::$form;
         $data['Yubikey'] = strtolower($data['Yubikey']);
