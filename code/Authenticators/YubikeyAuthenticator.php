@@ -7,7 +7,6 @@ use DateTime;
 use Form;
 use Member;
 use MemberAuthenticator;
-use SiteConfig;
 use ValidationResult;
 
 /**
@@ -24,7 +23,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
      * @param array $data
      * @param Form|null $form
      *
-     * @return bool|Member
+     * @return null|Member
      */
     public static function authenticate($data, Form $form = null)
     {
@@ -44,17 +43,14 @@ class YubikeyAuthenticator extends MemberAuthenticator
                 $yubiFingerprint = substr($yubiCode, 0, -32);
                 // If the member has a yubikey ID set, compare it to the fingerprint.
                 if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
-                    if ($form) {
-                        $form->sessionMessage($validationError->message(), 'bad');
-                    }
+                    self::updateForm($validationError, $form);
 
                     return null; // Yubikey id doesn't match the member.
                 }
-                $url = self::config()->get('AuthURL');
                 $clientID = YUBIAUTH_CLIENTID;
                 $apiKey = YUBIAUTH_APIKEY;
                 $service = new \Yubikey\Validate($apiKey, $clientID);
-                if ($url) {
+                if ($url = self::config()->get('AuthURL')) {
                     $service->setHost($url);
                 }
                 $result = $service->check($yubiCode);
@@ -69,10 +65,9 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
                     return $member;
                 } else {
-                    if ($form) {
-                        $form->sessionMessage($validationError->message(), 'bad');
-                    }
+                    self::updateForm($validationError, $form);
 
+                    return null;
                 }
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 $member->NoYubikeyCount += 1;
@@ -81,9 +76,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
                 if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
-                    if ($form) {
-                        $form->sessionMessage($validationError->message(), 'bad');
-                    }
+                    self::updateForm($validationError, $form);
                     $member->registerFailedLogin();
 
                     return null;
@@ -97,9 +90,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
                 if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
                     $validationError = ValidationResult::create(false,
                         _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
-                    if ($form) {
-                        $form->sessionMessage($validationError->message(), 'bad');
-                    }
+                    self::updateForm($validationError, $form);
                     $member->registerFailedLogin();
 
                     return null;
@@ -112,9 +103,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($member) {
             $member->registerFailedLogin();
         }
-        if ($form) {
-            $form->sessionMessage($validationError->message(), 'bad');
-        }
+        self::updateForm($validationError, $form);
 
         return null;
     }
@@ -152,6 +141,18 @@ class YubikeyAuthenticator extends MemberAuthenticator
             $member->Yubikey = $yubiString;
         }
         $member->write();
+    }
+
+    /**
+     * @param ValidationResult $validation
+     * @param null|Form $form
+     */
+    private static function updateForm($validation, $form)
+    {
+        if ($form) {
+            $form->sessionMessage($validation->message(), 'bad');
+        }
+
     }
 
 }
