@@ -13,7 +13,7 @@ use TextField;
  * 
  * Enable yubikey authentication disabling temporarily
  *
- * @property Member|Firesphere\YubiAuth\MemberExtension $owner
+ * @property Member|MemberExtension $owner
  * @property boolean $YubiAuthEnabled
  * @property string $Yubikey
  * @property int $NoYubikeyCount
@@ -32,7 +32,7 @@ class MemberExtension extends DataExtension
     );
 
     private static $indexes = array(
-        'Yubikey' => 'unique("Yubikey")'
+        'Yubikey' => 'unique("Yubikey")' // The Yubikey Signature is unique for every Yubikey.
     );
 
     /**

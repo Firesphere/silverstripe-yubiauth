@@ -12,7 +12,6 @@ namespace Firesphere\YubiAuth;
 use CheckboxField;
 use DataExtension;
 use FieldList;
-use NumericField;
 
 class SiteConfigExtension extends DataExtension
 {
