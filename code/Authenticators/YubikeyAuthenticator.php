@@ -3,6 +3,7 @@ namespace Firesphere\YubiAuth;
 
 use Config;
 use Controller;
+use DateTime;
 use Form;
 use Member;
 use MemberAuthenticator;
@@ -27,15 +28,16 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     public static function authenticate($data, Form $form = null)
     {
-        Config::inst()->update('Security','login_recording', false); // Disable login_recording for this auth.
+        Config::inst()->update('Security', 'login_recording', false); // Disable login_recording for this auth.
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
         Config::inst()->update('Security', 'login_recording', true);
-        $validationError = ValidationResult::create(false, _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
-        if($member && $member instanceof Member) {
+        $validationError = ValidationResult::create(false,
+            _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
+        if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
             if ($member &&
-                $member->YubiAuthEnabled
+                ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
             ) {
                 $data['Yubikey'] = strtolower($data['Yubikey']);
                 $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
@@ -61,6 +63,8 @@ class YubikeyAuthenticator extends MemberAuthenticator
                     self::updateMember($member, $yubiFingerprint);
                     if ($member) {
                         $member->registerSuccessfulLogin();
+                        $member->MaxNoYubiLogins = 0;
+                        $member->write();
                     }
 
                     return $member;
@@ -80,7 +84,23 @@ class YubikeyAuthenticator extends MemberAuthenticator
                         $form->sessionMessage($validationError->message(), 'bad');
                     }
                     $member->registerFailedLogin();
+
                     return false;
+                }
+                $date1 = new DateTime($member->Created);
+                $date2 = new DateTime(date('Y-m-d'));
+
+                $diff = $date2->diff($date1)->format("%a");
+                if (SiteConfig::current_site_config()->MaxNoYubiLoginDays > 0 && $diff >= SiteConfig::current_site_config()->MaxNoYubiLoginDays) {
+                    $validationError = ValidationResult::create(false,
+                        _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
+                    if ($form) {
+                        $form->sessionMessage($validationError->message(), 'bad');
+                    }
+                    $member->registerFailedLogin();
+
+                    return false;
+
                 }
 
                 return $member;
@@ -89,7 +109,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($member) {
             $member->registerFailedLogin();
         }
-        if($form) {
+        if ($form) {
             $form->sessionMessage($validationError->message(), 'bad');
         }
 
