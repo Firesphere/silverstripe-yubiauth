@@ -34,16 +34,14 @@ class YubikeyAuthenticator extends MemberAuthenticator
         Config::inst()->update('Security', 'login_recording', false); // Disable login_recording for this auth.
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
-        Config::inst()->update('Security', 'login_recording', true);
-        $validationError = ValidationResult::create(false,
-            _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
+        Config::inst()->update('Security', 'login_recording', true); // Enable login_recording again for the rest of the sequence
         self::$form = $form;
         if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
             if ($member &&
                 ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
             ) {
-                return self::authenticate_yubikey($data, $member, $validationError);
+                return self::authenticate_yubikey($data, $member);
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 return self::noYubiAuth($form, $member);
             }
@@ -51,7 +49,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($member) {
             $member->registerFailedLogin();
         }
-        self::updateForm($validationError, $form);
+        self::updateForm($form);
 
         return null;
     }
@@ -92,12 +90,16 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
-     * @param ValidationResult $validation
      * @param null|Form $form
      */
-    private static function updateForm($validation, $form)
+    private static function updateForm($form, $validation = null)
     {
         if ($form) {
+            if($validation == null) {
+                // Default validation error.
+                $validation = ValidationResult::create(false,
+                    _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
+            }
             $form->sessionMessage($validation->message(), 'bad');
         }
 
@@ -116,7 +118,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
             $validationError = ValidationResult::create(false,
                 _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
-            self::updateForm($validationError, $form);
+            self::updateForm($form, $validationError);
             $member->registerFailedLogin();
 
             return null;
@@ -130,7 +132,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
             $validationError = ValidationResult::create(false,
                 _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
-            self::updateForm($validationError, $form);
+            self::updateForm($form, $validationError);
             $member->registerFailedLogin();
 
             return null;
@@ -146,7 +148,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
      * @param ValidationResult $validationError
      * @return null|Member
      */
-    public static function authenticate_yubikey($data, $member, $validationError)
+    public static function authenticate_yubikey($data, $member)
     {
         $form = self::$form;
         $data['Yubikey'] = strtolower($data['Yubikey']);
@@ -154,7 +156,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         $yubiFingerprint = substr($yubiCode, 0, -32);
         // If the member has a yubikey ID set, compare it to the fingerprint.
         if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
-            self::updateForm($validationError, $form);
+            self::updateForm($form);
 
             return null; // Yubikey id doesn't match the member.
         }
@@ -176,7 +178,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
             return $member;
         } else {
-            self::updateForm($validationError, $form);
+            self::updateForm($form);
 
             return null;
         }
