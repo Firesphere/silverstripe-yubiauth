@@ -1,5 +1,6 @@
 ## status
 [![Scrutinizer Status](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth)
+[![License](https://poser.pugx.org/firesphere/yubiauth/license?format=flatS)](https://packagist.org/packages/firesphere/yubiauth)
 
 
 ## Usage
@@ -13,7 +14,7 @@ Configure your ClientID and API key in your environment file.
 
 ```
 define('YUBIAUTH_CLIENTID', '1234');
-define('YUBIAUTH_APIKEY', 'apikeyfromyubico');  //Shttps://upgrade.yubico.com/getapikey');
+define('YUBIAUTH_APIKEY', 'apikeyfromyubico');  // https://upgrade.yubico.com/getapikey');
 ```
 
 Optionally, configure your own URL endpoint in your YML file:
