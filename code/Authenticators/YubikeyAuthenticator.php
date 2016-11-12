@@ -38,8 +38,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         self::$form = $form;
         if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
-            if ($member &&
-                ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
+            if ($member && ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
             ) {
                 return self::authenticate_yubikey($data, $member);
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
@@ -92,7 +91,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
     /**
      * @param null|Form $form
      */
-    private static function updateForm($form, $validation = null)
+    private static function updateForm(&$form, $validation = null)
     {
         if ($form) {
             if ($validation == null) {
