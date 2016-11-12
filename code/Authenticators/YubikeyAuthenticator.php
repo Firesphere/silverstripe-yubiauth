@@ -145,7 +145,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
     /**
      * @param ValidationResult $validation
-     * @param Form $form
+     * @param null|Form $form
      */
     private static function updateForm($validation, $form)
     {
