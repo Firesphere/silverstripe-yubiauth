@@ -32,57 +32,61 @@ class YubikeyAuthenticator extends MemberAuthenticator
         $member = parent::authenticate($data, $form);
         Config::inst()->update('Security', 'login_recording', true);
         $validationError = ValidationResult::create(false, _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
-        // If we know the member, and it's YubiAuth enabled, continue.
-        if ($member &&
-            $member instanceof Member &&
-           $member->YubiAuthEnabled
-        ) {
-            $data['Yubikey'] = strtolower($data['Yubikey']);
-            $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
-            $yubiFingerprint = substr($yubiCode, 0, -32);
-            // If the member has a yubikey ID set, compare it to the fingerprint.
-            if($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
-                if($form) {
-                    $form->sessionMessage($validationError->message(), 'bad');
+        if($member && $member instanceof Member) {
+            // If we know the member, and it's YubiAuth enabled, continue.
+            if ($member &&
+                $member->YubiAuthEnabled
+            ) {
+                $data['Yubikey'] = strtolower($data['Yubikey']);
+                $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
+                $yubiFingerprint = substr($yubiCode, 0, -32);
+                // If the member has a yubikey ID set, compare it to the fingerprint.
+                if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
+                    if ($form) {
+                        $form->sessionMessage($validationError->message(), 'bad');
+                    }
+
+                    return false; // Yubikey id doesn't match the member.
                 }
+                $url = self::config()->get('AuthURL');
+                $clientID = YUBIAUTH_CLIENTID;
+                $apiKey = YUBIAUTH_APIKEY;
+                $service = new \Yubikey\Validate($apiKey, $clientID);
+                if ($url) {
+                    $service->setHost($url);
+                }
+                $result = $service->check($yubiCode);
 
-                return false; // Yubikey id doesn't match the member.
-            }
-            $url = self::config()->get('AuthURL');
-            $clientID = YUBIAUTH_CLIENTID;
-            $apiKey = YUBIAUTH_APIKEY;
-            $service = new \Yubikey\Validate($apiKey, $clientID);
-            if ($url) {
-                $service->setHost($url);
-            }
-            $result = $service->check($yubiCode);
+                if ($result->success() === true) {
+                    self::updateMember($member, $yubiFingerprint);
+                    if ($member) {
+                        $member->registerSuccessfulLogin();
+                    }
 
-            if ($result->success() === true) {
-                self::updateMember($member, $yubiFingerprint);
-                if($member) {
-                    $member->registerSuccessfulLogin();
+                    return $member;
+                } else {
+                    if ($form) {
+                        $form->sessionMessage($validationError->message(), 'bad');
+                    }
+
+                }
+            } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
+                $member->NoYubikeyCount += 1;
+                $member->write();
+                if (SiteConfig::current_site_config()->MaxNoYubiLogins > 0 && SiteConfig::current_site_config()->MaxNoYubiLogins <= $member->NoYubikeyCount) {
+                    $validationError = ValidationResult::create(false,
+                        _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
+                    if ($form) {
+                        $form->sessionMessage($validationError->message(), 'bad');
+                    }
+                    $member->registerFailedLogin();
+                    return false;
                 }
 
                 return $member;
-            } else {
-                if($form) {
-                    $form->sessionMessage($validationError->message(), 'bad');
-                }
-
             }
-        } elseif ($member && $member instanceof Member && !$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
-            $member->NoYubikeyCount += 1;
-            $member->write();
-            if(SiteConfig::current_site_config()->MaxNoYubiLogins > 0 && SiteConfig::current_site_config()->MaxNoYubiLogins <= $member->NoYubikeyCount) {
-                $validationError = ValidationResult::create(false, _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
-                if($form) {
-                    $form->sessionMessage($validationError->message(), 'bad');
-                }
-                $member->registerFailedLogin();
-            }
-            return $member;
         }
-        if($member){
+        if ($member) {
             $member->registerFailedLogin();
         }
         if($form) {
