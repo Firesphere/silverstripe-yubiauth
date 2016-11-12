@@ -1,36 +1,29 @@
-# See https://github.com/silverstripe-labs/silverstripe-travis-support for setup details
+# See https://github.com/silverstripe/silverstripe-travis-support for setup details
 
 sudo: false
 
 language: php
 
 php:
-  - 5.3
-  - 5.4
-  - 5.5
   - 5.6
   - 7.0
+  - 7.1
 
 env:
-  - DB=MYSQL CORE_RELEASE=3.2
-
-
-matrix:
-  allow_failures:
-    - php: 7.0
+  global:
+    - DB=MYSQL CORE_RELEASE=master
 
 before_script:
-  - composer self-update || true
-  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
+  - git clone git://github.com/silverstripe/silverstripe-travis-support.git ~/travis-support
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
-  - echo "define('YUBIAUTH_CLIENTID', '12345');" >> _ss_environment.php
-  - echo "define('YUBIAUTH_APIKEY', 't2ZMtKeValdA+H0jVpj3LIichn4=');" >> _ss_environment.php
-  - composer install
+  - printf "\n" >> .env
+  - echo 'YUBIAUTH_CLIENTID="12345"' >> .env
+  - echo 'YUBIAUTH_APIKEY="t2ZMtKeValdA+H0jVpj3LIichn4="' >> .env
 
 script:
-  - vendor/bin/phpunit yubiauth/tests
+  - vendor/bin/phpunit yubiauth/tests  --coverage-clover=coverage.xml
 
 after_success:
   - cd ~/builds/ss/yubiauth
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -f coverage.xml

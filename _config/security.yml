@@ -1,0 +1,2 @@
+Firesphere\YubiAuth\YubikeyLoginForm:
+  authenticator_class: Firesphere\YubiAuth\YubikeyAuthenticator

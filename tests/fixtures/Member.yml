@@ -1,17 +1,17 @@
-Permission:
+SilverStripe\Security\Permission:
   admin:
     Code: ADMIN
   security-admin:
     Code: CMS_ACCESS_SecurityAdmin
-Group:
+SilverStripe\Security\Group:
   admingroup:
     Title: Admin
     Code: admin
-    Permissions: =>Permission.admin
-Member:
+    Permissions: =>SilverStripe\Security\Permission.admin
+SilverStripe\Security\Member:
   admin:
     FirstName: Admin
     Email: admin@silverstripe.com
     Password: password
     YubiAuthEnabled: false
-    Groups: =>Group.admingroup
+    Groups: =>SilverStripe\Security\Group.admingroup

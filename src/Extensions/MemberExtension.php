@@ -1,24 +1,26 @@
 <?php
+
 namespace Firesphere\YubiAuth;
 
-use CheckboxField;
-use DataExtension;
-use FieldList;
-use Member;
-use ReadonlyField;
+use SilverStripe\Core\Extensible;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\NumericField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\ORM\DataExtension;
 
 /**
  * Class YubiAuthMemberExtension
  * 
  * Enable yubikey authentication disabling temporarily
  *
- * @property Member|MemberExtension $owner
  * @property boolean $YubiAuthEnabled
  * @property string $Yubikey
  * @property int $NoYubikeyCount
  */
 class MemberExtension extends DataExtension
 {
+    use Extensible;
 
     private static $db = array(
         'YubiAuthEnabled' => 'Boolean(true)',
@@ -33,6 +35,11 @@ class MemberExtension extends DataExtension
     private static $indexes = array(
         'Yubikey' => 'unique("Yubikey")' // The Yubikey Signature is unique for every Yubikey.
     );
+
+    public function __construct()
+    {
+        $this->constructExtensions();
+    }
 
     /**
      * @inheritdoc
@@ -52,17 +59,20 @@ class MemberExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->addFieldToTab('Root.Main', ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount')));
+        $fields->removeByName(['NoYubikeyCount', 'Yubikey', 'YubiAuthEnabled']);
+        $yubiCount = NumericField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount'));
+        if ($this->owner->YubiAuthEnabled) {
+            $yubiCount->setReadonly(true);
+        }
         $yubiField = ReadonlyField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
-
         $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
             'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
-        $fields->addFieldToTab('Root.Main', $yubiField);
 
         $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->fieldLabel('YubiAuthEnabled'));
         $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
             'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
-        $fields->addFieldToTab('Root.Main', $yubiAuth);
+
+        $fields->addFieldsToTab('Root.Main', [$yubiCount, $yubiField, $yubiAuth], 'DirectGroups');
 
     }
 

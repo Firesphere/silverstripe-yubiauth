@@ -4,10 +4,12 @@ namespace Firesphere\YubiAuth\Tests;
 
 use Firesphere\YubiAuth\QwertyConvertor;
 use PHPUnit_Framework_TestCase;
-use SapphireTest;
+use SilverStripe\Dev\SapphireTest;
 
 /**
  * Class QwertyConvertorTest
+ *
+ * Uses _INVALID_ Yubikey Authentication strings
  *
  * @mixin PHPUnit_Framework_TestCase
  */
