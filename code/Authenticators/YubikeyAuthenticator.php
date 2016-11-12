@@ -23,7 +23,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
      * @param array $data
      * @param Form|null $form
      *
-     * @return bool|Member
+     * @return null|Member
      */
     public static function authenticate($data, Form $form = null)
     {
