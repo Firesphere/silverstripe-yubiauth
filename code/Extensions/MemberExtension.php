@@ -5,6 +5,7 @@ use CheckboxField;
 use DataExtension;
 use FieldList;
 use Member;
+use ReadonlyField;
 use TextField;
 
 /**
@@ -12,16 +13,18 @@ use TextField;
  * 
  * Enable yubikey authentication disabling temporarily
  *
- * @property Member|\Firesphere\YubiAuth\YubiAuthMemberExtension $owner
+ * @property Member|Firesphere\YubiAuth\MemberExtension $owner
  * @property boolean $YubiAuthEnabled
  * @property string $Yubikey
+ * @property int $NoYubikeyCount
  */
-class YubiAuthMemberExtension extends DataExtension
+class MemberExtension extends DataExtension
 {
 
     private static $db = array(
         'YubiAuthEnabled' => 'Boolean(true)',
-        'Yubikey' => 'Varchar(16)'
+        'Yubikey'         => 'Varchar(16)',
+        'NoYubikeyCount'  => 'Int'
     );
 
     private static $defaults = array(
@@ -36,36 +39,44 @@ class YubiAuthMemberExtension extends DataExtension
      * @inheritdoc
      * @param array $labels
      */
-    public function updateFieldLabels(&$labels) {
+    public function updateFieldLabels(&$labels)
+    {
         parent::updateFieldLabels($labels);
         $labels['YubiAuthEnabled'] = _t('YubikeyAuthenticator.ENABLED', 'Yubikey Authentication Enabled');
         $labels['Yubikey'] = _t('YubikeyAuthenticator.YUBIKEY', 'Yubikey code');
+        $labels['NoYubikeyCount'] = _t('YubikeyAuthenticator.NOYUBIKEYCOUNT', 'Login count without yubikey');
     }
 
     /**
      * @inheritdoc
      * @param FieldList $fields
      */
-    public function updateCMSFields(FieldList $fields) {
+    public function updateCMSFields(FieldList $fields)
+    {
+        $fields->addFieldToTab('Root.Main', ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount')));
         $yubiField = TextField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
-        if($this->owner->Yubikey) {
+        if ($this->owner->Yubikey) {
             // Disable editing the field when a key is set, so it's harder to tamper with
             $yubiField->setReadonly(true); // Will be filled the first time the user uses his/her yubikey
         }
-        $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION', 'Unique identifier string for the Yubikey'));
+        $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
+            'Unique identifier string for the Yubikey'));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
-        $fields->addFieldToTab('Root.Main', $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled')));
-        $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION', 'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
+        $fields->addFieldToTab('Root.Main',
+            $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled')));
+        $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
+            'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
     }
 
     /**
      * @inheritdoc
      */
-    public function onBeforeWrite() {
+    public function onBeforeWrite()
+    {
         // Empty the yubikey field on member write, if the yubiauth is not required
         // Maybe the user lost the key? So a new one will be set next time it's logged in with key
-        if(!$this->owner->YubiAuthEnabled) {
+        if (!$this->owner->YubiAuthEnabled) {
             $this->owner->Yubikey = '';
         }
     }
