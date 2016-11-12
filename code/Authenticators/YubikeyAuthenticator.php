@@ -5,6 +5,7 @@ use Config;
 use Controller;
 use DateTime;
 use Form;
+use Injector;
 use Member;
 use MemberAuthenticator;
 use ValidationResult;
@@ -31,24 +32,23 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     public static function authenticate($data, Form $form = null)
     {
+        self::$form = $form;
         Config::inst()->update('Security', 'login_recording', false); // Disable login_recording for this auth.
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
         Config::inst()->update('Security', 'login_recording', true); // Enable login_recording again for the rest of the sequence
-        self::$form = $form;
         if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
-            if ($member && ($member->YubiAuthEnabled || $data['Yubikey'] !== '')
-            ) {
+            if ($member && ($member->YubiAuthEnabled || $data['Yubikey'] !== '')) {
                 return self::authenticate_yubikey($data, $member);
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
-                return self::authenticate_noyubikey($form, $member);
+                return self::authenticate_noyubikey($member);
             }
         }
         if ($member) {
             $member->registerFailedLogin();
         }
-        self::updateForm($form);
+        self::updateForm();
 
         return null;
     }
@@ -89,10 +89,11 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
-     * @param null|Form $form
+     * @param null $validation
      */
-    private static function updateForm(&$form, $validation = null)
+    private static function updateForm( $validation = null)
     {
+        $form = self::$form;
         if ($form) {
             if ($validation == null) {
                 // Default validation error.
@@ -108,19 +109,18 @@ class YubikeyAuthenticator extends MemberAuthenticator
      * Handle login if the user did not enter a Yubikey string.
      * Will break out and return NULL if the member should use their Yubikey
      *
-     * @param Form $form
      * @param Member $member
      * @return null|Member
      */
-    private static function authenticate_noyubikey(Form $form, $member)
+    private static function authenticate_noyubikey($member)
     {
         $member->NoYubikeyCount += 1;
         $member->write();
-        $maxNoYubi = Config::inst()->get('YubikeyAuthenticator', 'MaxNoYubiLogin');
+        $maxNoYubi = self::config()->get('MaxNoYubiLogin');
         if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
             $validationError = ValidationResult::create(false,
                 _t('YubikeyAuthenticator.ERRORMAXYUBIKEY', 'Maximum login without yubikey exceeded'));
-            self::updateForm($form, $validationError);
+            self::updateForm($validationError);
             $member->registerFailedLogin();
 
             return null;
@@ -129,12 +129,12 @@ class YubikeyAuthenticator extends MemberAuthenticator
         $date2 = new DateTime(date('Y-m-d'));
 
         $diff = $date2->diff($date1)->format("%a");
-        $maxNoYubiDays = Config::inst()->get('YubikeyAuthenticator', 'MaxNoYubiLoginDays');
+        $maxNoYubiDays = self::config()->get('MaxNoYubiLoginDays');
 
         if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
             $validationError = ValidationResult::create(false,
                 _t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS', 'Maximum days without yubikey exceeded'));
-            self::updateForm($form, $validationError);
+            self::updateForm($validationError);
             $member->registerFailedLogin();
 
             return null;
@@ -152,19 +152,18 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     private static function authenticate_yubikey($data, $member)
     {
-        $form = self::$form;
         $data['Yubikey'] = strtolower($data['Yubikey']);
         $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
         // If the member has a yubikey ID set, compare it to the fingerprint.
         if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
-            self::updateForm($form);
+            self::updateForm();
 
             return null; // Yubikey id doesn't match the member.
         }
         $clientID = YUBIAUTH_CLIENTID;
         $apiKey = YUBIAUTH_APIKEY;
-        $service = new \Yubikey\Validate($apiKey, $clientID);
+        $service = Injector::inst()->createWithArgs('Yubikey\Validate', array($apiKey, $clientID));
         if ($url = self::config()->get('AuthURL')) {
             $service->setHost($url);
         }
@@ -180,7 +179,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
             return $member;
         } else {
-            self::updateForm($form);
+            self::updateForm();
 
             return null;
         }
