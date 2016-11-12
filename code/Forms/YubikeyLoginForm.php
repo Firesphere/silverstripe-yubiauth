@@ -1,16 +1,9 @@
 <?php
 namespace Firesphere\YubiAuth;
 
-use CheckboxField;
-use FieldList;
-use HiddenField;
-use Member;
 use MemberLoginForm;
 use PasswordField;
-use Security;
 use SiteConfig;
-use TextField;
-use Injector;
 
 class YubikeyLoginForm extends MemberLoginForm
 {

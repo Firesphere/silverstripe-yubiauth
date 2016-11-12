@@ -13,7 +13,7 @@ use TextField;
  * 
  * Enable yubikey authentication disabling temporarily
  *
- * @property Member|Firesphere\YubiAuth\MemberExtension $owner
+ * @property Member|\Firesphere\YubiAuth\MemberExtension $owner
  * @property boolean $YubiAuthEnabled
  * @property string $Yubikey
  * @property int $NoYubikeyCount
