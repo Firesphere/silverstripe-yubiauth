@@ -13,8 +13,6 @@ php:
 
 env:
   - DB=MYSQL CORE_RELEASE=3.2
-  - YUBIAUTH_CLIENTID]30716
-  - YUBIAUTH_APIKEY="STDKcetpbketpid="
 
 
 matrix:
