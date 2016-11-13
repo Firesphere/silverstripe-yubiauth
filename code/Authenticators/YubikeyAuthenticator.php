@@ -179,7 +179,8 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
             return $member;
         } else {
-            self::updateForm();
+            $validationMessage = ValidationResult::create(false, _t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
+            self::updateForm($validationMessage);
 
             return null;
         }

@@ -1,13 +1,30 @@
 <?php
 
+namespace Firesphere\YubiAuth\Tests;
+
+use Authenticator;
+use Config;
 use Firesphere\YubiAuth\YubikeyAuthenticator;
 use Firesphere\YubiAuth\YubikeyLoginForm;
+use Injector;
+use Member;
+use PHPUnit_Framework_TestCase;
+use SapphireTest;
+use Security;
 
+/**
+ * Class YubiAuthenticatorTest
+ *
+ * @mixin PHPUnit_Framework_TestCase
+ */
 class YubiAuthenticatorTest extends SapphireTest
 {
 
     protected static $fixture_file = '../fixtures/Member.yml';
 
+    /**
+     * @var YubikeyLoginForm
+     */
     protected $form;
 
     public function setUp()
@@ -18,6 +35,8 @@ class YubiAuthenticatorTest extends SapphireTest
         /** @var YubikeyLoginForm $form */
         $this->form = YubikeyLoginForm::create($controller, 'Form', null, null);
         Authenticator::register_authenticator('Firesphere\\YubiAuth\\YubikeyAuthenticator');
+        $validator = new MockYubiValidate('apikey', '1234');
+        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
     }
 
     public function tearDown()
@@ -52,12 +71,10 @@ class YubiAuthenticatorTest extends SapphireTest
 
     public function testYubikey()
     {
-        $validator = new MockYubiValidate('apikey', '1234');
-        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
         $result = YubikeyAuthenticator::authenticate(array(
             'Email' => 'admin@silverstripe.com',
             'Password' => 'password',
-            'Yubikey' => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn'
+            'Yubikey' => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn' // This OTP is _not_ valid in real situations
         ), $this->form);
         $this->assertEquals('Member', $result->ClassName);
         $this->assertEquals('ccccccfinfgr', $result->Yubikey);

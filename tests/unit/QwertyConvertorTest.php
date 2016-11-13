@@ -1,11 +1,15 @@
 <?php
+
+namespace Firesphere\YubiAuth\Tests;
+
 use Firesphere\YubiAuth\QwertyConvertor;
+use PHPUnit_Framework_TestCase;
+use SapphireTest;
 
 /**
- * Created by PhpStorm.
- * User: simon
- * Date: 13-Nov-16
- * Time: 12:38
+ * Class QwertyConvertorTest
+ *
+ * @mixin PHPUnit_Framework_TestCase
  */
 class QwertyConvertorTest extends SapphireTest
 {

@@ -6,7 +6,6 @@ use DataExtension;
 use FieldList;
 use Member;
 use ReadonlyField;
-use TextField;
 
 /**
  * Class YubiAuthMemberExtension
@@ -54,13 +53,13 @@ class MemberExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         $fields->addFieldToTab('Root.Main', ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount')));
-        $yubiField = TextField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
+        $yubiField = ReadonlyField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
         if ($this->owner->Yubikey) {
             // Disable editing the field when a key is set, so it's harder to tamper with
             $yubiField->setReadonly(true); // Will be filled the first time the user uses his/her yubikey
         }
         $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
-            'Unique identifier string for the Yubikey'));
+            'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
         $fields->addFieldToTab('Root.Main',
