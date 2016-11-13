@@ -8,6 +8,9 @@ class YubiAuthenticatorTest extends SapphireTest
 
     protected static $fixture_file = '../fixtures/Member.yml';
 
+    /**
+     * @var YubikeyLoginForm
+     */
     protected $form;
 
     public function setUp()
@@ -18,6 +21,8 @@ class YubiAuthenticatorTest extends SapphireTest
         /** @var YubikeyLoginForm $form */
         $this->form = YubikeyLoginForm::create($controller, 'Form', null, null);
         Authenticator::register_authenticator('Firesphere\\YubiAuth\\YubikeyAuthenticator');
+        $validator = new MockYubiValidate('apikey', '1234');
+        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
     }
 
     public function tearDown()
@@ -52,8 +57,6 @@ class YubiAuthenticatorTest extends SapphireTest
 
     public function testYubikey()
     {
-        $validator = new MockYubiValidate('apikey', '1234');
-        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
         $result = YubikeyAuthenticator::authenticate(array(
             'Email' => 'admin@silverstripe.com',
             'Password' => 'password',
@@ -70,15 +73,4 @@ class YubiAuthenticatorTest extends SapphireTest
         $this->assertEquals(null, $resultNoYubi);
     }
 
-    public function testReplayedOTP()
-    {
-        $validator = new MockYubiValidate('apikey', '1234', array(), true);
-        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
-        $result = YubikeyAuthenticator::authenticate(array(
-            'Email' => 'admin@silverstripe.com',
-            'Password' => 'password',
-            'Yubikey' => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn'
-        ), $this->form);
-        $this->assertEquals(null, $result);
-    }
 }
