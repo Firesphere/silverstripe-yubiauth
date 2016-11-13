@@ -3,6 +3,11 @@
 use Firesphere\YubiAuth\YubikeyAuthenticator;
 use Firesphere\YubiAuth\YubikeyLoginForm;
 
+/**
+ * Class YubiAuthenticatorTest
+ *
+ * @mixin PHPUnit_Framework_TestCase
+ */
 class YubiAuthenticatorTest extends SapphireTest
 {
 

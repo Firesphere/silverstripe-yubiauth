@@ -2,10 +2,9 @@
 use Firesphere\YubiAuth\QwertyConvertor;
 
 /**
- * Created by PhpStorm.
- * User: simon
- * Date: 13-Nov-16
- * Time: 12:38
+ * Class QwertyConvertorTest
+ *
+ * @mixin PHPUnit_Framework_TestCase
  */
 class QwertyConvertorTest extends SapphireTest
 {
