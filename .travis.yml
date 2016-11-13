@@ -25,7 +25,7 @@ before_script:
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
   - echo "define('YUBIAUTH_CLIENTID', '12345');" >> _ss_environment.php
-  - echo "define('YUBIAUTH_APIKEY', 'SuperSecretAPIKey=');" >> _ss_environment.php
+  - echo "define('YUBIAUTH_APIKEY', 't2ZMtKeValdA+H0jVpj3LIichn4=');" >> _ss_environment.php
   - composer install
 
 script:
