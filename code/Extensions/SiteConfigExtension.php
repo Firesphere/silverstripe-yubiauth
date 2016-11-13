@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: simon
- * Date: 12-Nov-16
- * Time: 12:31
- */
 
 namespace Firesphere\YubiAuth;
 

@@ -1,7 +1,7 @@
 ## status
 [![Scrutinizer Status](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth)
 [![License](https://poser.pugx.org/firesphere/yubiauth/license?format=flatS)](https://packagist.org/packages/firesphere/yubiauth)
-
+[![TravisCI Status](https://travis-ci.org/Firesphere/silverstripe-yubiauth.svg?branch=master)](https://travis-ci.org/Firesphere/silverstripe-yubiauth/)
 
 ## Usage
 
@@ -43,6 +43,10 @@ Firesphere\YubiAuth\YubikeyAuthenticator:
 * SilverStripe CMS ~3.2
 * SilverStripe Framework ~3.2
 * `enygma/yubikey` master
+
+## Test your yubikey
+
+https://demo.yubico.com/
 
 ## Actual license
 
