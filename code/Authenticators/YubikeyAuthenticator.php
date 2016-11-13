@@ -9,6 +9,7 @@ use Injector;
 use Member;
 use MemberAuthenticator;
 use ValidationResult;
+use Yubikey\Response;
 
 /**
  * Class YubikeyAuthenticator
@@ -44,8 +45,6 @@ class YubikeyAuthenticator extends MemberAuthenticator
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 return self::authenticate_noyubikey($member);
             }
-        }
-        if ($member) {
             $member->registerFailedLogin();
         }
         self::updateForm();
@@ -89,9 +88,9 @@ class YubikeyAuthenticator extends MemberAuthenticator
     }
 
     /**
-     * @param null $validation
+     * @param null|ValidationResult $validation
      */
-    private static function updateForm( $validation = null)
+    private static function updateForm($validation = null)
     {
         $form = self::$form;
         if ($form) {
@@ -167,6 +166,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
         if ($url = self::config()->get('AuthURL')) {
             $service->setHost($url);
         }
+        /** @var Response $result */
         $result = $service->check($yubiCode);
 
         if ($result->success() === true) {

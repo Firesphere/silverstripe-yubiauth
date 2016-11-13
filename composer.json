@@ -2,6 +2,7 @@
   "name": "firesphere/yubiauth",
   "description": "Enable authentication with a Yubikey",
   "type": "silverstripe-module",
+  "license": "BSD-3-Clause",
   "keywords": [
     "silverstripe",
     "Yubikey"
