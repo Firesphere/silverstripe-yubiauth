@@ -1,9 +1,9 @@
-## status
+# status
 [![Scrutinizer Status](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth)
 [![License](https://poser.pugx.org/firesphere/yubiauth/license?format=flatS)](https://packagist.org/packages/firesphere/yubiauth)
 [![TravisCI Status](https://travis-ci.org/Firesphere/silverstripe-yubiauth.svg?branch=master)](https://travis-ci.org/Firesphere/silverstripe-yubiauth/)
 
-## Usage
+# Usage
 
 Install the module using composer:
 ```
@@ -23,13 +23,17 @@ YubikeyAuthenticator:
     AuthURL: 'https://my-auth-url.com'
 ```
 
+### Note of caution
+
+If you use your own Yubikey Authentication server, any One Time Password sent to that will _not_ be invalid on the public Yubico API's
+
 To disable the existing MemberAuthenticator, add the following to your `_config.php`:
 ```
 Authenticator::unregister_authenticator('MemberAuthenticator');
 ```
 This is _not_ a good idea to do on a dev environment ;)
 
-## Configuration
+# Configuration
 
 The amount of days, or total amount of logins without Yubikey, are set in the config.yml. You can override it in your mysite config with the following setting:
 ```
@@ -38,7 +42,7 @@ Firesphere\YubiAuth\YubikeyAuthenticator:
   MaxNoYubiLoginDays: 5
 ```
 
-## Requirements:
+# Requirements:
 
 * SilverStripe CMS ~3.2
 * SilverStripe Framework ~3.2
@@ -48,7 +52,7 @@ Firesphere\YubiAuth\YubikeyAuthenticator:
 
 https://demo.yubico.com/
 
-## Actual license
+# Actual license
 
 This module is published under BSD 2-clause license, although these are not in the actual classes, the license does apply:
 
@@ -68,7 +72,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 (I shouldn't scream, should I? This is copy-paste from BSD-2 license...)
 
-## Did you read this entire readme? You rock!
+# Did you read this entire readme? You rock!
 
 Pictured below is a cow, just for you.
 ```
