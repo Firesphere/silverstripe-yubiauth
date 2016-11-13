@@ -1,7 +1,16 @@
 <?php
 
+namespace Firesphere\YubiAuth\Tests;
+
+use Authenticator;
+use Config;
 use Firesphere\YubiAuth\YubikeyAuthenticator;
 use Firesphere\YubiAuth\YubikeyLoginForm;
+use Injector;
+use Member;
+use PHPUnit_Framework_TestCase;
+use SapphireTest;
+use Security;
 
 /**
  * Class YubiAuthenticatorTest

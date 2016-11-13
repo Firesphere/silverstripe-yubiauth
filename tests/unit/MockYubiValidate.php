@@ -1,4 +1,7 @@
 <?php
+
+namespace Firesphere\YubiAuth\Tests;
+
 use Yubikey\Response;
 use Yubikey\ResponseCollection;
 use Yubikey\Validate;
