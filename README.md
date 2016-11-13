@@ -10,12 +10,16 @@ Install the module using composer:
 composer require firesphere\yubiauth
 ```
 
+## Configuration
+
 Configure your ClientID and API key in your environment file.
 
 ```
 define('YUBIAUTH_CLIENTID', '1234');
 define('YUBIAUTH_APIKEY', 'apikeyfromyubico');  // https://upgrade.yubico.com/getapikey');
 ```
+
+## Options
 
 Optionally, configure your own URL endpoint in your YML file:
 ```
