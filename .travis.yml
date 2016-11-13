@@ -24,6 +24,8 @@ before_script:
   - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
+  - echo "define('YUBIAUTH_CLIENTID', '12345');" >> _ss_environment.php
+  - echo "define('YUBIAUTH_APIKEY', 'SuperSecretAPIKey=');" >> _ss_environment.php
   - composer install
 
 script:
