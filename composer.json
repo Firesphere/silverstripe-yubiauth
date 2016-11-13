@@ -25,5 +25,10 @@
     "issues": "https://github.com/firesphere/silverstripe-yubiauth/issues",
     "source": "https://github.com/firesphere/silverstripe-yubiauth"
   },
+  "autoload": {
+    "psr-4": {
+      "Firesphere\\YubiAuth": "code/"
+    }
+  },
   "target-dir": "yubiauth"
 }
