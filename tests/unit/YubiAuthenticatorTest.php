@@ -90,7 +90,8 @@ class YubiAuthenticatorTest extends SapphireTest
     {
         /** @var Member $member */
         $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
-        $this->assertEquals('1', $member->YubiAuthEnabled);
+        $member->YubiAuthEnabled = true;
+        $member->write();
         $failedLoginCount = $member->FailedLoginCount;
         $resultNoYubi = YubikeyAuthenticator::authenticate(array(
             'Email' => 'admin@silverstripe.com',
