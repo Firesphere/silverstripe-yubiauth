@@ -10,6 +10,7 @@ use Member;
 use MemberAuthenticator;
 use ValidationResult;
 use Yubikey\Response;
+use Yubikey\Validate;
 
 /**
  * Class YubikeyAuthenticator
@@ -37,10 +38,10 @@ class YubikeyAuthenticator extends MemberAuthenticator
         Config::inst()->update('Security', 'login_recording', false); // Disable login_recording for this auth.
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
-        Config::inst()->update('Security', 'login_recording', true); // Enable login_recording again for the rest of the sequence
+        Config::inst()->update('Security', 'login_recording', true); // Enable login_recording again
         if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
-            if ($member && ($member->YubiAuthEnabled || $data['Yubikey'] !== '')) {
+            if ($member->YubiAuthEnabled || $data['Yubikey'] !== '') {
                 return self::authenticate_yubikey($data, $member);
             } elseif (!$member->YubiAuthEnabled) { // We do not have to check the YubiAuth for now.
                 return self::authenticate_noyubikey($member);
@@ -62,6 +63,11 @@ class YubikeyAuthenticator extends MemberAuthenticator
         return YubikeyLoginForm::create($controller, 'LoginForm');
     }
 
+    /**
+     * Name of this authenticator
+     *
+     * @return string
+     */
     public static function get_name()
     {
         return _t('YubikeyAuthenticator.TITLE', 'Yubikey login');
@@ -78,6 +84,9 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     private static function updateMember($member, $yubiString)
     {
+        $member->registerSuccessfulLogin();
+        $member->NoYubikeyCount = 0;
+
         if (!$member->YubiAuthEnabled) {
             $member->YubiAuthEnabled = true;
         }
@@ -94,7 +103,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
     {
         $form = self::$form;
         if ($form) {
-            if ($validation == null) {
+            if ($validation === null) {
                 // Default validation error.
                 $validation = ValidationResult::create(false,
                     _t('YubikeyAuthenticator.ERRORYUBIKEY', 'Yubikey authentication error'));
@@ -113,7 +122,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     private static function authenticate_noyubikey($member)
     {
-        $member->NoYubikeyCount += 1;
+        ++$member->NoYubikeyCount;
         $member->write();
         $maxNoYubi = self::config()->get('MaxNoYubiLogin');
         if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
@@ -157,12 +166,12 @@ class YubikeyAuthenticator extends MemberAuthenticator
         // If the member has a yubikey ID set, compare it to the fingerprint.
         if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
             self::updateForm();
+            $member->registerFailedLogin();
 
             return null; // Yubikey id doesn't match the member.
         }
-        $clientID = YUBIAUTH_CLIENTID;
-        $apiKey = YUBIAUTH_APIKEY;
-        $service = Injector::inst()->createWithArgs('Yubikey\Validate', array($apiKey, $clientID));
+        /** @var Validate $service */
+        $service = Injector::inst()->createWithArgs('Yubikey\Validate', array(YUBIAUTH_APIKEY, YUBIAUTH_CLIENTID));
         if ($url = self::config()->get('AuthURL')) {
             $service->setHost($url);
         }
@@ -171,16 +180,13 @@ class YubikeyAuthenticator extends MemberAuthenticator
 
         if ($result->success() === true) {
             self::updateMember($member, $yubiFingerprint);
-            if ($member) {
-                $member->registerSuccessfulLogin();
-                $member->NoYubikeyCount = 0;
-                $member->write();
-            }
 
             return $member;
         } else {
-            $validationMessage = ValidationResult::create(false, _t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
+            $validationMessage = ValidationResult::create(false,
+                _t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
             self::updateForm($validationMessage);
+            $member->registerFailedLogin();
 
             return null;
         }
