@@ -54,18 +54,16 @@ class MemberExtension extends DataExtension
     {
         $fields->addFieldToTab('Root.Main', ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount')));
         $yubiField = ReadonlyField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
-        if ($this->owner->Yubikey) {
-            // Disable editing the field when a key is set, so it's harder to tamper with
-            $yubiField->setReadonly(true); // Will be filled the first time the user uses his/her yubikey
-        }
+
         $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
             'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
-        $fields->addFieldToTab('Root.Main',
-            $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled')));
+        $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled'));
         $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
             'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
+        $fields->addFieldToTab('Root.Main', $yubiAuth);
+
     }
 
     /**

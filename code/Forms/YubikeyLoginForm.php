@@ -21,8 +21,10 @@ class YubikeyLoginForm extends MemberLoginForm
         $checkCurrentUser = true
     ) {
         parent::__construct($controller, $name, $fields, $actions, $checkCurrentUser);
+
         $this->Fields()->insertAfter('Password', PasswordField::create("Yubikey",
             _t('YubikeyAuthenticater.FORMFIELDNAME', 'Yubikey Authentication')));
+
         if (!SiteConfig::current_site_config()->RequirePassword) {
             $this->Fields()->removeByName('Password');
         }

@@ -43,6 +43,7 @@ class QwertyConvertor
 
     /**
      * @param string $originalString
+     * @param string $from Origin we have to convert from
      *
      * @return string
      */

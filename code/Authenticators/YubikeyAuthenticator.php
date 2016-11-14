@@ -22,7 +22,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
     /**
      * @var null|Form
      */
-    protected static $form = null;
+    protected static $form;
 
     /**
      * @inheritdoc
@@ -35,10 +35,11 @@ class YubikeyAuthenticator extends MemberAuthenticator
     public static function authenticate($data, Form $form = null)
     {
         self::$form = $form;
+        $currentLoginRecording = Config::inst()->get('Security', 'login_recording');
         Config::inst()->update('Security', 'login_recording', false); // Disable login_recording for this auth.
         // First, let's see if we know the member
         $member = parent::authenticate($data, $form);
-        Config::inst()->update('Security', 'login_recording', true); // Enable login_recording again
+        Config::inst()->update('Security', 'login_recording', $currentLoginRecording); // Reset login_recording
         if ($member && $member instanceof Member) {
             // If we know the member, and it's YubiAuth enabled, continue.
             if ($member->YubiAuthEnabled || $data['Yubikey'] !== '') {
