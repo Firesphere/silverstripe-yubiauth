@@ -82,13 +82,24 @@ class YubiAuthenticatorTest extends SapphireTest
         ), $this->form);
         $this->assertEquals('Member', $result->ClassName);
         $this->assertEquals('ccccccfinfgr', $result->Yubikey);
+        $this->assertEquals('admin@silverstripe.com', $result->Email);
         $this->assertEquals(true, $result->YubiAuthEnabled);
+    }
+
+    public function testYubikeyRequiredButNotUsed()
+    {
+        /** @var Member $member */
+        $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
+        $this->assertEquals('1', $member->YubiAuthEnabled);
+        $failedLoginCount = $member->FailedLoginCount;
         $resultNoYubi = YubikeyAuthenticator::authenticate(array(
             'Email' => 'admin@silverstripe.com',
             'Password' => 'password',
             'Yubikey' => ''
         ), $this->form);
         $this->assertEquals(null, $resultNoYubi);
+        $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
+        $this->assertGreaterThan($failedLoginCount, $member->FailedLoginCount);
     }
 
 }
