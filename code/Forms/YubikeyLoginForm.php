@@ -26,7 +26,7 @@ class YubikeyLoginForm extends MemberLoginForm
             _t('YubikeyAuthenticater.FORMFIELDNAME', 'Yubikey Authentication')));
 
         if (!SiteConfig::current_site_config()->RequirePassword) {
-            $this->Fields()->removeByName('Password');
+            $this->Fields()->removeByName(array('Password', 'forgotPassword'));
         }
     }
 
