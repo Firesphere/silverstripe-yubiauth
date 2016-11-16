@@ -1,3 +1,6 @@
+---
+Name: YubiAuth
+---
 Firesphere\YubiAuth\YubikeyAuthenticator:
   AuthURL: ''
   MaxNoYubiLogin: 25

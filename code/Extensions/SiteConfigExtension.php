@@ -26,8 +26,8 @@ class SiteConfigExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         parent::updateCMSFields($fields);
-        $fields->addFieldToTab('Root.Access',
-            $requirePass = CheckboxField::create('RequirePassword', $this->owner->fieldLabel('RequirePassword')));
+        $requirePass = CheckboxField::create('RequirePassword', $this->owner->fieldLabel('RequirePassword'));
+        $fields->addFieldToTab('Root.Access', $requirePass);
         $requirePass->setDisabled(true);
         $requirePass->setDescription(_t('YubikeyAuthenticator.NOTAVAILABLE', 'This option is not yet available'));
     }

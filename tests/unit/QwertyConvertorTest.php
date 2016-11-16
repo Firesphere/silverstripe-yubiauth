@@ -14,6 +14,12 @@ use SapphireTest;
 class QwertyConvertorTest extends SapphireTest
 {
 
+    public function testCapitalisationConversion()
+    {
+        $string = QwertyConvertor::convertString('CCCCCCFINFGRTJHDEITNIRLNGGBICVNNTHETHDLJLCVL');
+        $this->assertEquals('ccccccfinfgrtjhdeitnirlnggbicvnnthethdljlcvl', $string);
+    }
+
     public function testDvorakConversion()
     {
         $string = QwertyConvertor::convertString('jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn');
