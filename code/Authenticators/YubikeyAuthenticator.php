@@ -169,7 +169,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
     {
         $yubikeyMember = Member::get()->filter(array('Yubikey' => $yubiFingerprint))->first();
         // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
-        if ($yubikeyMember->exists() && $yubikeyMember->ID !== $member->ID) {
+        if ($yubikeyMember && $yubikeyMember->ID !== $member->ID) {
             $validationMessage = ValidationResult::create(false,
                 _t('YubikeyAuthenticator.DUPLICATE', 'Yubikey is duplicate'));
             self::updateForm($validationMessage);
