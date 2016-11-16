@@ -53,7 +53,7 @@ class YubikeyAuthenticator extends MemberAuthenticator
                 self::$yubiService = Injector::inst()->createWithArgs('Yubikey\Validate',
                     array(YUBIAUTH_APIKEY, YUBIAUTH_CLIENTID));
                 if ($url = self::config()->get('AuthURL')) {
-                    $service->setHost($url);
+                    self::$yubiService->setHost($url);
                 }
 
                 return self::authenticate_yubikey($data, $member);
