@@ -30,3 +30,6 @@ before_script:
 
 script:
   - vendor/bin/phpunit yubiauth/tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
