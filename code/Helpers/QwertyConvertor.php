@@ -34,6 +34,7 @@ class QwertyConvertor
      */
     public static function convertString($yubiString)
     {
+        $yubiString = strtolower($yubiString);
         /** The string is Dvorak, convert it to QWERTY */
         if (strpos($yubiString, 'jjjjjj') === 0) {
             return self::convertToQwerty($yubiString, 'dvorak');

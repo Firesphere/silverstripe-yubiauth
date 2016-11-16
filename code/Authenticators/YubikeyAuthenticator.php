@@ -135,7 +135,6 @@ class YubikeyAuthenticator extends MemberAuthenticator
      */
     private static function authenticate_yubikey($data, $member)
     {
-        $data['Yubikey'] = strtolower($data['Yubikey']);
         $yubiCode = QwertyConvertor::convertString($data['Yubikey']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
         if (!self::validateYubikey($member, $yubiFingerprint)) {
