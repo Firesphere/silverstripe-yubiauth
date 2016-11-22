@@ -59,7 +59,7 @@ class MemberExtension extends DataExtension
             'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
-        $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled'));
+        $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->fieldLabel('YubiAuthEnabled'));
         $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
             'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
         $fields->addFieldToTab('Root.Main', $yubiAuth);

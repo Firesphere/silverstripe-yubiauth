@@ -8,9 +8,9 @@ use SiteConfig;
 class YubikeyLoginForm extends MemberLoginForm
 {
 
-    protected $authenticator_class = 'Firesphere\\YubiAuth\\YubikeyAuthenticator';
-
     /**
+     * Setup the yubikey authentication after generating the standard loginform.
+     *
      * @inheritdoc
      */
     public function __construct(
@@ -20,6 +20,7 @@ class YubikeyLoginForm extends MemberLoginForm
         $actions = null,
         $checkCurrentUser = true
     ) {
+        $this->authenticator_class = 'Firesphere\\YubiAuth\\YubikeyAuthenticator';
         parent::__construct($controller, $name, $fields, $actions, $checkCurrentUser);
 
         $this->Fields()->insertAfter('Password', PasswordField::create("Yubikey",
