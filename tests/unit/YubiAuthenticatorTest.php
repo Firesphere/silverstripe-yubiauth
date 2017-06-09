@@ -26,6 +26,11 @@ class YubiAuthenticatorTest extends SapphireTest
      */
     protected $form;
 
+    /**
+     * @var YubikeyMemberAuthenticator
+     */
+    protected $authenticator;
+
     public function setUp()
     {
         parent::setUp();
@@ -34,6 +39,7 @@ class YubiAuthenticatorTest extends SapphireTest
         /** @var YubikeyLoginForm $form */
         $this->form = YubikeyLoginForm::create($controller, YubikeyMemberAuthenticator::class, 'LoginForm', null, null);
         $validator = new MockYubiValidate('apikey', '1234');
+        $this->authenticator = Injector::inst()->get(YubikeyMemberAuthenticator::class);
         Injector::inst()->registerService($validator, 'Yubikey\\Validate');
     }
 
@@ -44,7 +50,7 @@ class YubiAuthenticatorTest extends SapphireTest
 
     public function testNoYubikey()
     {
-        $member = YubikeyMemberAuthenticator::singleton()->authenticate(
+        $member = $this->authenticator->authenticate(
             [
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
@@ -63,7 +69,7 @@ class YubiAuthenticatorTest extends SapphireTest
         $member->NoYubikeyCount = 25;
         $member->write();
         $failedLoginCount = $member->FailedLoginCount;
-        $result = YubikeyMemberAuthenticator::singleton()->authenticate(
+        $result = $this->authenticator->authenticate(
             [
 
                 'Email'    => 'admin@silverstripe.com',
@@ -79,7 +85,7 @@ class YubiAuthenticatorTest extends SapphireTest
 
     public function testYubikey()
     {
-        $result = YubikeyMemberAuthenticator::singleton()->authenticate(
+        $result = $this->authenticator->authenticate(
             [
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
@@ -104,7 +110,7 @@ class YubiAuthenticatorTest extends SapphireTest
         $member->NoYubikeyCount = 50;
         $member->write();
         $failedLoginCount = $member->FailedLoginCount;
-        $resultNoYubi = YubikeyMemberAuthenticator::singleton()->authenticate(
+        $resultNoYubi = $this->authenticator->authenticate(
             [
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
