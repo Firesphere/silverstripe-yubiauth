@@ -20,6 +20,7 @@ before_script:
   - printf "\n" >> .env
   - echo 'YUBIAUTH_CLIENTID="12345"' >> .env
   - echo 'YUBIAUTH_APIKEY="t2ZMtKeValdA+H0jVpj3LIichn4="' >> .env
+  - cp ~/yubiauth/_config/config.yml.example ~/yubiauth/_config/config.yml
 
 script:
   - vendor/bin/phpunit yubiauth/tests  --coverage-clover=coverage.xml

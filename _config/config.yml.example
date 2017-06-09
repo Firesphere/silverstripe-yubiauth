@@ -8,8 +8,8 @@ Firesphere\YubiAuth\YubiAuthProvider:
   MaxNoYubiLoginDays: 5
 # Copy the part below and uncomment it to enable the yubikey authentication.
 # You can also name it default, to replace the default login method.
-#SilverStripe\Core\Injector\Injector:
-#  SilverStripe\Security\Security:
-#    properties:
-#      authenticators:
-#        yubikey: %$Firesphere\YubiAuth\YubikeyMemberAuthenticator
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        yubikey: %$Firesphere\YubiAuth\YubikeyMemberAuthenticator
