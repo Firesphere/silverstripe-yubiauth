@@ -24,7 +24,7 @@ class YubikeyLoginHandler extends MemberLoginHandler
     /**
      * Return the MemberLoginForm form
      */
-    public function loginForm()
+    public function LoginForm()
     {
         return YubikeyLoginForm::create(
             $this,
@@ -38,7 +38,9 @@ class YubikeyLoginHandler extends MemberLoginHandler
         if ($member = $this->checkLogin($data, $message)) {
             Session::set('YubikeyLoginHandler.MemberID', $member->ID);
             Session::set('YubikeyLoginHandler.Data', $data);
-            Session::set('YubikeyLoginHandler.BackURL', $data['BackURL']);
+            if (!empty($data['BackURL'])) {
+                Session::set('YubikeyLoginHandler.BackURL', $data['BackURL']);
+            }
 
             return $this->redirect($this->link('yubikey-authentication'));
         }

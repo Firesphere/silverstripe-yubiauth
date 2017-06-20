@@ -6,7 +6,7 @@ use Exception;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\Form;
+use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
@@ -29,15 +29,10 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
 
     private $authenticatorName = 'yubiauth';
 
-    public function supportedServices()
-    {
-        return Authenticator::LOGIN;
-    }
-
     /**
      * @inheritdoc
      *
-     * @param array $data
+     * @param array   $data
      * @param $message
      *
      * @return null|Member
@@ -64,7 +59,8 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
                     [
                         getenv('YUBIAUTH_APIKEY'),
                         getenv('YUBIAUTH_CLIENTID')
-                    ]);
+                    ]
+                );
 
                 $result = $this->authenticateYubikey($data, $member);
                 if ($result instanceof ValidationResult) {
@@ -93,8 +89,9 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
     /**
      * Validate a member plus it's yubikey login. It compares the fingerprintt and after that,
      * tries to validate the Yubikey string
-     * @param array $data
-     * @param Member $member
+     *
+     * @param  array  $data
+     * @param  Member $member
      * @return ValidationResult|Member
      */
     private function authenticateYubikey($data, $member)
@@ -141,7 +138,7 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
      * Handle login if the user did not enter a Yubikey string.
      * Will break out and return NULL if the member should use their Yubikey
      *
-     * @param Member $member
+     * @param  Member $member
      * @return ValidationResult|Member
      */
     private function authenticateNoYubikey($member)

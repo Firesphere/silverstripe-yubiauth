@@ -3,10 +3,13 @@
 namespace Firesphere\YubiAuth\Tests;
 
 use Firesphere\YubiAuth\YubikeyLoginForm;
+use Firesphere\YubiAuth\YubikeyLoginHandler;
 use Firesphere\YubiAuth\YubikeyMemberAuthenticator;
 use PHPUnit_Framework_TestCase;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
@@ -20,7 +23,10 @@ class YubiAuthenticatorTest extends SapphireTest
 
     protected static $fixture_file = '../fixtures/Member.yml';
 
-
+    /**
+     * @var YubikeyLoginHandler
+     */
+    protected $handler;
     /**
      * @var YubikeyLoginForm
      */
@@ -35,11 +41,9 @@ class YubiAuthenticatorTest extends SapphireTest
     {
         parent::setUp();
         $this->objFromFixture(Member::class, 'admin');
-        $controller = Security::create();
-        /** @var YubikeyLoginForm $form */
-        $this->form = YubikeyLoginForm::create($controller, YubikeyMemberAuthenticator::class, 'LoginForm', null, null);
         $validator = new MockYubiValidate('apikey', '1234');
         $this->authenticator = Injector::inst()->get(YubikeyMemberAuthenticator::class);
+        $this->handler = Injector::inst()->get(YubikeyLoginHandler::class, true, [Security::login_url(), $this->authenticator]);
         Injector::inst()->registerService($validator, 'Yubikey\\Validate');
     }
 
@@ -50,14 +54,15 @@ class YubiAuthenticatorTest extends SapphireTest
 
     public function testNoYubikey()
     {
-        $member = $this->authenticator->authenticate(
+        $this->handler->doLogin(
             [
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
-                'Yubikey'  => ''
             ],
-            $this->form
+            null
         );
+        $this->handler->validateYubikey(['yubiauth' => '']);
+        $member = Security::getCurrentUser();
         $this->assertGreaterThan(0, $member->NoYubikeyCount);
         $this->assertEquals(null, $member->Yubikey);
     }
@@ -69,31 +74,34 @@ class YubiAuthenticatorTest extends SapphireTest
         $member->NoYubikeyCount = 25;
         $member->write();
         $failedLoginCount = $member->FailedLoginCount;
-        $result = $this->authenticator->authenticate(
+        $this->handler->doLogin(
             [
 
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
-                'Yubikey'  => ''
             ],
-            $this->form
+            null
         );
-        $this->assertEquals(null, $result);
+        $this->handler->validateYubikey(['yubiauth' => '']);
         $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
         $this->assertGreaterThan($failedLoginCount, $member->FailedLoginCount);
     }
 
     public function testYubikey()
     {
-        $result = $this->authenticator->authenticate(
+        $this->handler->doLogin(
             [
+
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
-                'Yubikey'  => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn'
-                // This OTP is _not_ valid in real situations
             ],
-            $this->form
+            null
         );
+        $this->handler->validateYubikey([
+            'yubiauth'  => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn'
+            // This OTP is _not_ valid in real situations
+        ]);
+        $result = Security::getCurrentUser();
         $this->assertEquals(Member::class, $result->ClassName);
         $this->assertEquals('ccccccfinfgr', $result->Yubikey);
         $this->assertEquals(1, $result->YubiAuthEnabled);
@@ -109,15 +117,20 @@ class YubiAuthenticatorTest extends SapphireTest
         $member->Yubikey = 'ccccccfinfgr';
         $member->NoYubikeyCount = 50;
         $member->write();
+        Injector::inst()->get(IdentityStore::class)->logOut();
         $failedLoginCount = $member->FailedLoginCount;
-        $resultNoYubi = $this->authenticator->authenticate(
+        $this->handler->doLogin(
             [
+
                 'Email'    => 'admin@silverstripe.com',
                 'Password' => 'password',
-                'Yubikey'  => ''
             ],
-            $this->form
+            null
         );
+        $this->handler->validateYubikey([
+            'yubiauth'  => ''
+        ]);
+        $resultNoYubi = Security::getCurrentUser();
         $this->assertEquals(null, $resultNoYubi);
         $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
         $this->assertGreaterThan($failedLoginCount, $member->FailedLoginCount);

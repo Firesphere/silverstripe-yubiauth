@@ -20,7 +20,6 @@ use SilverStripe\ORM\DataExtension;
  */
 class MemberExtension extends DataExtension
 {
-    use Extensible;
 
     private static $db = array(
         'YubiAuthEnabled' => 'Boolean(true)',
@@ -35,11 +34,6 @@ class MemberExtension extends DataExtension
     private static $indexes = array(
         'Yubikey' => 'unique("Yubikey")' // The Yubikey Signature is unique for every Yubikey.
     );
-
-    public function __construct()
-    {
-        $this->constructExtensions();
-    }
 
     /**
      * @inheritdoc
@@ -65,12 +59,20 @@ class MemberExtension extends DataExtension
             $yubiCount->setReadonly(true);
         }
         $yubiField = ReadonlyField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
-        $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
-            'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
+        $yubiField->setDescription(
+            _t(
+                'YubikeyAuthenticator.YUBIKEYDESCRIPTION',
+                'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'
+            )
+        );
 
         $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->fieldLabel('YubiAuthEnabled'));
-        $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
-            'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
+        $yubiAuth->setDescription(
+            _t(
+                'YubikeyAuthenticator.ENABLEDDESCRIPTION',
+                'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'
+            )
+        );
 
         $fields->addFieldsToTab('Root.Main', [$yubiCount, $yubiField, $yubiAuth], 'DirectGroups');
 

@@ -10,6 +10,7 @@ use SilverStripe\Security\Member;
 
 /**
  * Class YubiAuthProvider
+ *
  * @package Firesphere\YubiAuth
  */
 abstract class YubiAuthProvider
@@ -33,8 +34,8 @@ abstract class YubiAuthProvider
     /**
      * Check if the yubikey is unique and linked to the member trying to logon
      *
-     * @param Member $member
-     * @param string $yubiFingerprint
+     * @param  Member $member
+     * @param  string $yubiFingerprint
      * @return ValidationResult|bool
      */
     public static function validateYubikey(Member $member, $yubiFingerprint)
@@ -43,8 +44,12 @@ abstract class YubiAuthProvider
         // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
         if ($yubikeyMembers->count() > 1) {
             $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.DUPLICATE',
-                'Yubikey is duplicate, contact your administrator as soon as possible!'));
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.DUPLICATE',
+                    'Yubikey is duplicate, contact your administrator as soon as possible!'
+                )
+            );
             $member->registerFailedLogin();
 
             return $validationResult;
@@ -60,8 +65,12 @@ abstract class YubiAuthProvider
         if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
             $member->registerFailedLogin();
             $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCH',
-                'Yubikey fingerprint does not match found member'));
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.NOMATCH',
+                    'Yubikey fingerprint does not match found member'
+                )
+            );
 
             return $validationResult; // Yubikey id doesn't match the member.
         }
@@ -73,7 +82,7 @@ abstract class YubiAuthProvider
     /**
      * Check if a member is allowed to login without a yubikey
      *
-     * @param Member $member
+     * @param  Member $member
      * @return ValidationResult|Member
      */
     public static function checkNoYubiLogins(Member $member)
@@ -81,8 +90,12 @@ abstract class YubiAuthProvider
         $maxNoYubi = self::config()->get('MaxNoYubiLogin');
         if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
             $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.ERRORMAXYUBIKEY',
-                'Maximum login without yubikey exceeded'));
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.ERRORMAXYUBIKEY',
+                    'Maximum login without yubikey exceeded'
+                )
+            );
 
             $member->registerFailedLogin();
 
@@ -95,7 +108,7 @@ abstract class YubiAuthProvider
     /**
      * Check if the member is allowed login after so many days of not using a yubikey
      *
-     * @param Member $member
+     * @param  Member $member
      * @return ValidationResult|Member
      */
     public static function checkNoYubiDays(Member $member)
@@ -109,8 +122,12 @@ abstract class YubiAuthProvider
 
         if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
             $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS',
-                'Maximum days without yubikey exceeded'));
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS',
+                    'Maximum days without yubikey exceeded'
+                )
+            );
             $member->registerFailedLogin();
 
             return $validationResult;

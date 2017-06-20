@@ -12,11 +12,12 @@ class YubikeyLoginForm extends MemberLoginForm
 
     /**
      * YubikeyLoginForm constructor.
+     *
      * @param LoginHandler $handler
-     * @param string $name
-     * @param null $fields
-     * @param null $actions
-     * @param bool $checkCurrentUser
+     * @param string       $name
+     * @param null         $fields
+     * @param null         $actions
+     * @param bool         $checkCurrentUser
      */
     public function __construct(
         $handler,

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: simon
- * Date: 25-Apr-17
- * Time: 19:29
- */
 
 namespace Firesphere\YubiAuth;
 
@@ -34,9 +28,11 @@ class YubikeyForm extends LoginForm
 
     public function getFormFields()
     {
-        $fields = FieldList::create([
+        $fields = FieldList::create(
+            [
             PasswordField::create('yubiauth', 'Yubikey second factor authentication')
-        ]);
+            ]
+        );
         $backURL = $this->controller->getRequest()->getVar('BackURL');
         if ($backURL) {
             $fields->push(HiddenField::create('BackURL', $backURL));
@@ -47,9 +43,11 @@ class YubikeyForm extends LoginForm
 
     public function getFormActions()
     {
-        $action = FieldList::create([
+        $action = FieldList::create(
+            [
             FormAction::create('validateYubikey', 'Validate')
-        ]);
+            ]
+        );
 
         return $action;
     }
