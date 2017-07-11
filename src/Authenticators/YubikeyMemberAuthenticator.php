@@ -3,6 +3,7 @@
 namespace Firesphere\YubiAuth;
 
 use Exception;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
@@ -22,6 +23,12 @@ use Yubikey\Validate;
 class YubikeyMemberAuthenticator extends MemberAuthenticator
 {
 
+    public function supportedServices()
+    {
+        // Bitwise-OR of all the supported services in this Authenticator, to make a bitmask
+        return Authenticator::LOGIN | Authenticator::LOGOUT | Authenticator::CHANGE_PASSWORD
+            | Authenticator::RESET_PASSWORD | Authenticator::CHECK_PASSWORD;
+    }
     /**
      * @var Validate
      */
@@ -33,13 +40,14 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
      * @inheritdoc
      *
      * @param array   $data
+     * @param HTTPRequest $request
      * @param $message
      *
      * @return null|Member
      */
-    public function validateYubikey($data, &$message)
+    public function validateYubikey($data, $request, &$message)
     {
-        $memberID = Session::get('YubikeyLoginHandler.MemberID');
+        $memberID = $request->getSession()->get('YubikeyLoginHandler.MemberID');
         // First, let's see if we know the member
         /** @var Member $member */
         $member = Member::get()->filter(['ID' => $memberID])->first();
