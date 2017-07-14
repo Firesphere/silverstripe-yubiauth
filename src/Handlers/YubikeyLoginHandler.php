@@ -2,26 +2,23 @@
 
 namespace Firesphere\YubiAuth;
 
+use Firesphere\BootstrapMFA\MFALoginHandler;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
-use SilverStripe\Security\LoginForm;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\LoginHandler as MemberLoginHandler;
-use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Security\Security;
 
-class YubikeyLoginHandler extends MemberLoginHandler
+class YubikeyLoginHandler extends MFALoginHandler
 {
 
     private static $url_handlers = [
-        'yubikey-authentication' => 'secondFactor'
+        'verify' => 'secondFactor'
     ];
 
     private static $allowed_actions = [
         'LoginForm',
         'dologin',
         'secondFactor',
-        'yubikeyForm'
+        'MFAForm'
     ];
 
     /**
@@ -36,36 +33,9 @@ class YubikeyLoginHandler extends MemberLoginHandler
         );
     }
 
-    /**
-     * @param array $data
-     * @param LoginForm|MemberLoginForm $form
-     * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
-     */
-    public function doLogin($data, MemberLoginForm $form, HTTPRequest $request)
+    public function MFAForm()
     {
-        $session = $request->getSession();
-        if ($member = $this->checkLogin($data, $request, $message)) {
-            $session->set('YubikeyLoginHandler.MemberID', $member->ID);
-            $session->set('YubikeyLoginHandler.Data', $data);
-            if (!empty($data['BackURL'])) {
-                $session->set('YubikeyLoginHandler.BackURL', $data['BackURL']);
-            }
-
-            return $this->redirect($this->link('yubikey-authentication'));
-        }
-        $this->redirectBack();
-
-    }
-
-    public function secondFactor()
-    {
-        return ['Form' => $this->yubikeyForm()];
-    }
-
-    public function yubikeyForm()
-    {
-        return YubikeyForm::create($this, 'yubikeyForm');
+        return YubikeyForm::create($this, __FUNCTION__);
     }
 
     /**
@@ -78,16 +48,24 @@ class YubikeyLoginHandler extends MemberLoginHandler
     {
         $session = $request->getSession();
         $message = false;
-        $memberData = $session->get('YubikeyLoginHandler.Data');
+        $memberData = $session->get('MFALogin.Data');
         $this->request['BackURL'] = !empty($memberData['BackURL']) ? $memberData['BackURL'] : '';
         $member = $this->authenticator->validateYubikey($data, $request, $message);
+        $memberData = $session->get('MFALogin.Data');
         if ($member instanceof Member) {
-            $memberData = $session->get('YubikeyLoginHandler.Data');
             $this->performLogin($member, $memberData, $this->getRequest());
             Security::setCurrentUser($member);
             $session->clear('YubikeyLoginHandler');
 
             return $this->redirectAfterSuccessfulLogin();
+        } elseif (isset($data['yubiauth'])) {
+            $data['token'] = $data['yubiauth'];
+            if ($member = parent::validate($data, $form, $request)) {
+                $this->performLogin($member, $memberData, $request);
+                Security::setCurrentUser($member);
+
+                return $this->redirectAfterSuccessfulLogin();
+            }
         }
 
         return $this->redirect($this->link());

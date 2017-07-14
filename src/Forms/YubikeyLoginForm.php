@@ -2,12 +2,11 @@
 
 namespace Firesphere\YubiAuth;
 
+use Firesphere\BootstrapMFA\MFALoginForm;
 use LogicException;
-use SilverStripe\Forms\PasswordField;
-use SilverStripe\Security\MemberAuthenticator\MemberLoginForm as MemberLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 
-class YubikeyLoginForm extends MemberLoginForm
+class YubikeyLoginForm extends MFALoginForm
 {
 
     /**

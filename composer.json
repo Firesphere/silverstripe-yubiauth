@@ -17,8 +17,8 @@
     }
   ],
   "require": {
-    "silverstripe/cms": "4.0.x-dev",
     "silverstripe/framework": "4.0.x-dev",
+    "firesphere/bootstrapmfa": "dev-master",
     "enygma/yubikey": "^3.2"
   },
   "require-dev": {
