@@ -23,12 +23,6 @@ jobs:
 
     working_directory: ~/var/www
 
-    branches:
-      only:
-        - master
-        - develop
-        - /feature.*/
-
     steps:
       - run: git clone -b 4 https://github.com/silverstripe/silverstripe-installer.git ~/var/www
 
