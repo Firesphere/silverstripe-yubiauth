@@ -3,6 +3,12 @@
 [![License](https://poser.pugx.org/firesphere/yubiauth/license?format=flatS)](https://packagist.org/packages/firesphere/yubiauth)
 [![TravisCI Status](https://travis-ci.org/Firesphere/silverstripe-yubiauth.svg?branch=master)](https://travis-ci.org/Firesphere/silverstripe-yubiauth/)
 
+# WARNING
+
+Current SS4 branch is broken, based on the refactoring of authentication inside the core.
+
+Until that refactor is completed, the SS4 version of this module will not work properly.
+
 # Usage
 
 Install the module using composer:
@@ -48,8 +54,8 @@ Firesphere\YubiAuth\YubikeyAuthenticator:
 
 # Requirements:
 
-* SilverStripe CMS ~3.2
-* SilverStripe Framework ~3.2
+* SilverStripe CMS 3.2 or higher
+* SilverStripe Framework 3.2 or higher
 * `enygma/yubikey` master
 
 ## Test your yubikey
@@ -58,7 +64,7 @@ https://demo.yubico.com/
 
 # Actual license
 
-This module is published under BSD 2-clause license, although these are not in the actual classes, the license does apply:
+This module is published under BSD 3-clause license, although these are not in the actual classes, the license does apply:
 
 http://www.opensource.org/licenses/BSD-2-Clause
 
@@ -73,8 +79,6 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-(I shouldn't scream, should I? This is copy-paste from BSD-2 license...)
 
 # Did you read this entire readme? You rock!
 

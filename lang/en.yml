@@ -1,16 +1,17 @@
 en:
-  YubikeyAuthenticater:
-    FORMFIELDNAME: 'Yubikey Authentication'
   YubikeyAuthenticator:
+    DUPLICATE: 'Yubikey is duplicate, contact your administrator as soon as possible!'
     ENABLED: 'Yubikey Authentication Enabled'
     ENABLEDDESCRIPTION: 'If the user is new and doesn''t have a Yubikey yet, you can disable the auth temporarily'
     ERROR: 'Yubikey authentication error'
     ERRORMAXYUBIKEY: 'Maximum login without yubikey exceeded'
     ERRORMAXYUBIKEYDAYS: 'Maximum days without yubikey exceeded'
     ERRORYUBIKEY: 'Yubikey authentication error'
-    NOTAVAILABLE: 'This option is not yet available'
+    FORMFIELDNAME: 'Yubikey Authentication'
+    NOMATCH: 'Yubikey fingerprint does not match found member'
     NOYUBIKEYCOUNT: 'Login count without yubikey'
-    REQUIREPASSWORD: 'Require a password on login'
-    TITLE: 'Yubikey login'
+    TITLE: 'Yubikey 2 factor login'
     YUBIKEY: 'Yubikey code'
     YUBIKEYDESCRIPTION: 'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'
+  YubikeyLoginForm:
+    TITLE: 'Yubikey Login Form'

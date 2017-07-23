@@ -1,4 +1,5 @@
 <?php
+
 namespace Firesphere\YubiAuth;
 
 /**
@@ -18,6 +19,7 @@ class QwertyConvertor
 
     /**
      * This might be tricky to detect, as the initial position of C seems to be the same
+     *
      * @var string Azerty layout conversion
      */
     protected static $azerty = ")-azertyuiop^\$qsdfghjklmùwxcvbn,;:=°_AZERTYUIOP¨*QSDFGHJKLM%WXCVBN?./+";
@@ -35,16 +37,17 @@ class QwertyConvertor
     public static function convertString($yubiString)
     {
         $yubiString = strtolower($yubiString);
-        /** The string is Dvorak, convert it to QWERTY */
+        /* The string is Dvorak, convert it to QWERTY */
         if (strpos($yubiString, 'jjjjjj') === 0) {
             return self::convertToQwerty($yubiString, 'dvorak');
         }
+
         return $yubiString;
     }
 
     /**
      * @param string $originalString
-     * @param string $from Origin we have to convert from
+     * @param string $from           Origin we have to convert from
      *
      * @return string
      */
@@ -54,9 +57,10 @@ class QwertyConvertor
         $qwerty = str_split(self::$qwerty);
         $from = str_split(self::$$from);
         $return = '';
-        foreach($originalArray as $item) {
+        foreach ($originalArray as $item) {
             $return .= $qwerty[array_search($item, $from, true)];
         }
+
         return $return;
     }
 
