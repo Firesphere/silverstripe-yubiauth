@@ -83,7 +83,7 @@ class YubikeyLoginHandler extends MemberLoginHandler
         $member = $this->authenticator->validateYubikey($data, $request, $message);
         if ($member instanceof Member) {
             $memberData = $session->get('YubikeyLoginHandler.Data');
-            $this->performLogin($member, $memberData, $this->getRequest());
+            $this->performLogin($member, $memberData, $request);
             Security::setCurrentUser($member);
             $session->clear('YubikeyLoginHandler');
 
