@@ -44,6 +44,7 @@ jobs:
       - run: composer install -n --prefer-dist
       - run: composer require firesphere/yubiauth:dev-master
       - run: composer require scriptfusion/phpunit-immediate-exception-printer:^1
+      - run: cp yubiauth/_config/config.yml.example mysite/_config/yubikey.yml
       - run: rm phpunit.xml.dist
       - run: cp yubiauth/phpunit.xml.dist .
       - run: framework/sake dev/build
