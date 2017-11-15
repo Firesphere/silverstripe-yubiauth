@@ -17,8 +17,7 @@
     }
   ],
   "require": {
-    "silverstripe/cms": "4.0.x-dev",
-    "silverstripe/framework": "4.0.x-dev",
+    "silverstripe/recipe-cms": "4.0",
     "enygma/yubikey": "^3.2"
   },
   "require-dev": {
@@ -33,6 +32,5 @@
   "support": {
     "issues": "https://github.com/firesphere/silverstripe-yubiauth/issues",
     "source": "https://github.com/firesphere/silverstripe-yubiauth"
-  },
-  "target-dir": "yubiauth"
+  }
 }

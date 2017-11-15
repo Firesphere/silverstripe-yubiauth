@@ -34,13 +34,8 @@ jobs:
             php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             php -r "unlink('composer-setup.php');"
 
-      - run: composer create-project silverstripe/installer:dev-master ~/var/www -n
-      - run: composer require scriptfusion/phpunit-immediate-exception-printer:^1
-      - run: composer require firesphere/yubiauth:dev-master -n
-      - run: cp yubiauth/_config/config.yml.example mysite/_config/yubikey.yml
-      - run: rm phpunit.xml.dist
-      - run: cp yubiauth/phpunit.xml.dist .
-      - run: framework/sake dev/build
+      - run: composer create-project firesphere/yubiauth:dev-master ~/var/www -n
+      - run: vendor/bin/sake dev/build
 
       # run tests!
       - run: vendor/bin/phpunit yubiauth/tests/unit -d memory_limit=512M
