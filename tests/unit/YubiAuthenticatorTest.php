@@ -14,6 +14,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use Yubikey\Validate;
 
 /**
  * Class YubiAuthenticatorTest
@@ -53,7 +54,7 @@ class YubiAuthenticatorTest extends SapphireTest
             true,
             [$this->handler, YubikeyMemberAuthenticator::class, '']
         );
-        Injector::inst()->registerService($validator, 'Yubikey\\Validate');
+        Injector::inst()->registerService($validator, Validate::class);
     }
 
     public function tearDown()
