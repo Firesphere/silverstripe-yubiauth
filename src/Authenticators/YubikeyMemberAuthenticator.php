@@ -66,8 +66,8 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
                 /** @var Validate $service */
                 $this->yubiService = Injector::inst()->createWithArgs(Validate::class,
                     [
+                        Environment::getEnv('YUBIAUTH_CLIENTID'),
                         Environment::getEnv('YUBIAUTH_APIKEY'),
-                        Environment::getEnv('YUBIAUTH_CLIENTID')
                     ]
                 );
 
