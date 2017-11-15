@@ -17,11 +17,11 @@
 	It is safe to remove this file for normal website operation.
 -->
 <phpunit printerClass="ScriptFUSION\PHPUnitImmediateExceptionPrinter\ImmediateExceptionPrinter"
-		 bootstrap="framework/tests/bootstrap.php"
+		 bootstrap="vendor/silverstripe/framework/tests/bootstrap.php"
 		 colors="true">
 
 	<testsuite name="Default">
-		<directory>yubiauth/tests</directory>
+		<directory>tests</directory>
 	</testsuite>
 
 	<groups>
