@@ -47,7 +47,7 @@ class YubiAuthenticatorTest extends SapphireTest
         $this->objFromFixture(Member::class, 'admin');
         $validator = new MockYubiValidate('apikey', '1234');
         $this->authenticator = Injector::inst()->get(YubikeyMemberAuthenticator::class);
-        $this->handler = Injector::inst()->get(YubikeyLoginHandler::class, true, [Security::login_url(), $this->authenticator]);
+        $this->handler = Injector::inst()->createWithArgs(YubikeyLoginHandler::class, [Security::login_url(), $this->authenticator]);
         $this->form = Injector::inst()->get(
             YubikeyLoginForm::class,
             true,
