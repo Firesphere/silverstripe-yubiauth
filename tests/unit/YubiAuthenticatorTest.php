@@ -88,10 +88,10 @@ class YubiAuthenticatorTest extends SapphireTest
     public function testNoYubikeyLockout()
     {
         /** @var Member $member */
-        $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
+        $member = Member::get()->filter(['Email' => 'admin@silverstripe.com'])->first();
+        $failedLoginCount = $member->FailedLoginCount;
         $member->NoYubikeyCount = 25;
         $member->write();
-        $failedLoginCount = $member->FailedLoginCount;
         $request = new HTTPRequest('POST', '/');
         $request->setSession(new Session(['hi' => 'bye']));
         $this->handler->setRequest($request);
@@ -109,7 +109,7 @@ class YubiAuthenticatorTest extends SapphireTest
             YubikeyForm::create($this->handler),
             $request
         );
-        $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
+        $member = Member::get()->filter(['Email' => 'admin@silverstripe.com'])->first();
         $this->assertGreaterThan($failedLoginCount, $member->FailedLoginCount);
     }
 
