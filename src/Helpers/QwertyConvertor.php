@@ -41,6 +41,14 @@ class QwertyConvertor
         if (strpos($yubiString, 'jjjjjj') === 0) {
             return self::convertToQwerty($yubiString, 'dvorak');
         }
+        /* Azerty has some odd characters which we can use to detect it */
+        if (
+            strpos($yubiString, '°') !== false ||
+            strpos($yubiString, '¨') !== false ||
+            strpos($yubiString, '$') !== false
+        ) {
+            return self::convertToQwerty($yubiString, 'azerty');
+        }
 
         return $yubiString;
     }
@@ -53,9 +61,13 @@ class QwertyConvertor
      */
     public static function convertToQwerty($originalString, $from)
     {
+        $originalArray = str_split($originalString);
         $qwerty = str_split(self::$qwerty);
         $from = str_split(self::$$from);
-        $return = str_replace($from, $qwerty, $originalString);
+        $return = '';
+        foreach ($originalArray as $item) {
+            $return .= $qwerty[array_search($item, $from, true)];
+        }
 
         return $return;
     }
