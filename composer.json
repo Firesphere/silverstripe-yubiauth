@@ -17,7 +17,7 @@
     }
   ],
   "require": {
-    "silverstripe/recipe-cms": "4.0",
+    "silverstripe/recipe-cms": "~1.0",
     "enygma/yubikey": "^3.2"
   },
   "require-dev": {
