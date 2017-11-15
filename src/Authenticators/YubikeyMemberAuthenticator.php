@@ -66,17 +66,12 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
                 /** @var Validate $service */
                 $this->yubiService = Injector::inst()->createWithArgs(Validate::class,
                     [
-                        Environment::getEnv('YUBIAUTH_CLIENTID'),
                         Environment::getEnv('YUBIAUTH_APIKEY'),
+                        Environment::getEnv('YUBIAUTH_CLIENTID'),
                     ]
                 );
 
-                $result = $this->authenticateYubikey($data, $member);
-                if ($result instanceof ValidationResult) {
-                    $message = $result->getMessages();
-                }
-
-                return $result;
+                return $this->authenticateYubikey($data, $member);
             }
             $member->registerFailedLogin();
             $message = 'Yubikey Authentication error';
