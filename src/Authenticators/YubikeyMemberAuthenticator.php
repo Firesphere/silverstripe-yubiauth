@@ -64,7 +64,7 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
             // If we know the member, and it's YubiAuth enabled, continue.
             if (!empty($data['yubiauth'])) {
                 /** @var Validate $service */
-                $this->yubiService = Injector::inst()->createWithArgs('Yubikey\\Validate',
+                $this->yubiService = Injector::inst()->createWithArgs(Validate::class,
                     [
                         Environment::getEnv('YUBIAUTH_APIKEY'),
                         Environment::getEnv('YUBIAUTH_CLIENTID')
