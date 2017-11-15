@@ -1,7 +1,9 @@
 # status
 [![Scrutinizer Status](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Firesphere/silverstripe-yubiauth)
 [![License](https://poser.pugx.org/firesphere/yubiauth/license?format=flatS)](https://packagist.org/packages/firesphere/yubiauth)
-[![TravisCI Status](https://travis-ci.org/Firesphere/silverstripe-yubiauth.svg?branch=master)](https://travis-ci.org/Firesphere/silverstripe-yubiauth/)
+[![CircleCI](https://circleci.com/gh/Firesphere/silverstripe-yubiauth/tree/master.svg?style=svg)](https://circleci.com/gh/Firesphere/silverstripe-yubiauth/tree/master)
+[![codecov](https://codecov.io/gh/Firesphere/silverstripe-yubiauth/branch/master/graph/badge.svg)](https://codecov.io/gh/Firesphere/silverstripe-yubiauth)
+[![Maintainability](https://api.codeclimate.com/v1/badges/6a70a4966a6b670d6799/maintainability)](https://codeclimate.com/github/Firesphere/silverstripe-yubiauth/maintainability)
 
 # WARNING
 
