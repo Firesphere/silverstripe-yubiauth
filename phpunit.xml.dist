@@ -16,9 +16,7 @@
 
 	It is safe to remove this file for normal website operation.
 -->
-<phpunit printerClass="ScriptFUSION\PHPUnitImmediateExceptionPrinter\ImmediateExceptionPrinter"
-		 bootstrap="vendor/silverstripe/framework/tests/bootstrap.php"
-		 colors="true">
+<phpunit bootstrap="vendor/silverstripe/framework/tests/bootstrap.php" colors="true">
 
 	<testsuite name="Default">
 		<directory>tests</directory>
