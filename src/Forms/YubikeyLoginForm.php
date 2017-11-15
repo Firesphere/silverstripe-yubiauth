@@ -3,6 +3,7 @@
 namespace Firesphere\YubiAuth;
 
 use LogicException;
+use SilverStripe\Core\Environment;
 use SilverStripe\Forms\PasswordField;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm as MemberLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
@@ -27,10 +28,10 @@ class YubikeyLoginForm extends MemberLoginForm
         $actions = null,
         $checkCurrentUser = true
     ) {
-        if (!getenv('YUBIAUTH_CLIENTID')) {
+        if (!Environment::getEnv('YUBIAUTH_CLIENTID')) {
             throw new LogicException('YUBIAUTH_CLIENTID Must be enabled to use YubiAuth');
         }
-        if (!getenv('YUBIAUTH_APIKEY')) {
+        if (!Environment::getEnv('YUBIAUTH_APIKEY')) {
             throw new LogicException('YUBIAUTH_APIKEY Must be enabled to use YubiAuth');
         }
 

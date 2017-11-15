@@ -53,13 +53,9 @@ class QwertyConvertor
      */
     public static function convertToQwerty($originalString, $from)
     {
-        $originalArray = str_split($originalString);
         $qwerty = str_split(self::$qwerty);
         $from = str_split(self::$$from);
-        $return = '';
-        foreach ($originalArray as $item) {
-            $return .= $qwerty[array_search($item, $from, true)];
-        }
+        $return = str_replace($from, $qwerty, $originalString);
 
         return $return;
     }

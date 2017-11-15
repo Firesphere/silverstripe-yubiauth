@@ -6,6 +6,7 @@ use Exception;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\ValidationResult;
@@ -65,8 +66,8 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
                 /** @var Validate $service */
                 $this->yubiService = Injector::inst()->createWithArgs('Yubikey\\Validate',
                     [
-                        getenv('YUBIAUTH_APIKEY'),
-                        getenv('YUBIAUTH_CLIENTID')
+                        Environment::getEnv('YUBIAUTH_APIKEY'),
+                        Environment::getEnv('YUBIAUTH_CLIENTID')
                     ]
                 );
 
