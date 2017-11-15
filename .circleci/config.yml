@@ -38,4 +38,5 @@ jobs:
       - run: vendor/bin/sake dev/build
 
       # run tests!
-      - run: vendor/bin/phpunit yubiauth/tests/unit -d memory_limit=512M
+      - run: vendor/bin/phpunit --coverage-clover=coverage.xml -d memory_limit=512M tests/unit
+      - run: bash <(curl -s https://codecov.io/bash) -f coverage.xml
