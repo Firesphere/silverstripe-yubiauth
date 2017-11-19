@@ -30,7 +30,7 @@ class YubikeyForm extends LoginForm
     {
         $fields = FieldList::create(
             [
-            PasswordField::create('yubiauth', 'Yubikey second factor authentication')
+                PasswordField::create('yubiauth', 'Yubikey second factor authentication')
             ]
         );
         $backURL = $this->controller->getRequest()->getVar('BackURL');
@@ -45,7 +45,7 @@ class YubikeyForm extends LoginForm
     {
         $action = FieldList::create(
             [
-            FormAction::create('validateYubikey', 'Validate')
+                FormAction::create('validateYubikey', 'Validate')
             ]
         );
 

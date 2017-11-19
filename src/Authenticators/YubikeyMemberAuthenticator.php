@@ -4,11 +4,9 @@ namespace Firesphere\YubiAuth;
 
 use Exception;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
@@ -24,23 +22,33 @@ use Yubikey\Validate;
 class YubikeyMemberAuthenticator extends MemberAuthenticator
 {
 
+    /**
+     * @var Validate
+     */
+    protected $yubiService;
+    private $authenticatorName = 'yubiauth';
+
+    /**
+     * Name of this authenticator
+     *
+     * @return string
+     */
+    public static function get_name()
+    {
+        return _t('YubikeyAuthenticator.TITLE', 'Yubikey 2 factor login');
+    }
+
     public function supportedServices()
     {
         // Bitwise-OR of all the supported services in this Authenticator, to make a bitmask
         return Authenticator::LOGIN | Authenticator::LOGOUT | Authenticator::CHANGE_PASSWORD
             | Authenticator::RESET_PASSWORD | Authenticator::CHECK_PASSWORD;
     }
-    /**
-     * @var Validate
-     */
-    protected $yubiService;
-
-    private $authenticatorName = 'yubiauth';
 
     /**
      * @inheritdoc
      *
-     * @param array   $data
+     * @param array $data
      * @param HTTPRequest $request
      * @param $message
      *
@@ -81,20 +89,30 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
     }
 
     /**
-     * Name of this authenticator
+     * Handle login if the user did not enter a Yubikey string.
+     * Will break out and return NULL if the member should use their Yubikey
      *
-     * @return string
+     * @param  Member $member
+     * @return ValidationResult|Member
      */
-    public static function get_name()
+    private function authenticateNoYubikey($member)
     {
-        return _t('YubikeyAuthenticator.TITLE', 'Yubikey 2 factor login');
+        ++$member->NoYubikeyCount;
+        $member->write();
+        $yubiAuthNoYubi = YubiAuthProvider::checkNoYubiAttempts($member);
+        if ($yubiAuthNoYubi instanceof ValidationResult) {
+
+            return $yubiAuthNoYubi;
+        }
+
+        return $member;
     }
 
     /**
      * Validate a member plus it's yubikey login. It compares the fingerprintt and after that,
      * tries to validate the Yubikey string
      *
-     * @param  array  $data
+     * @param  array $data
      * @param  Member $member
      * @return ValidationResult|Member
      */
@@ -136,26 +154,6 @@ class YubikeyMemberAuthenticator extends MemberAuthenticator
         $member->registerFailedLogin();
 
         return $validationResult;
-    }
-
-    /**
-     * Handle login if the user did not enter a Yubikey string.
-     * Will break out and return NULL if the member should use their Yubikey
-     *
-     * @param  Member $member
-     * @return ValidationResult|Member
-     */
-    private function authenticateNoYubikey($member)
-    {
-        ++$member->NoYubikeyCount;
-        $member->write();
-        $yubiAuthNoYubi = YubiAuthProvider::checkNoYubiAttempts($member);
-        if ($yubiAuthNoYubi instanceof ValidationResult) {
-
-            return $yubiAuthNoYubi;
-        }
-
-        return $member;
     }
 
     /**

@@ -15,17 +15,18 @@ class MockYubiValidate extends Validate
         $nonce = $this->generateNonce();
         $result = new Response(
             [
-            'h' => '',
-            'otp' => $otp,
-            'status' => 'OK',
-            'nonce' => $nonce,
-            'inputNonce' => $nonce,
-            'inputOtp' => $otp,
-            'host' => 'api.yubico.com',
-            'sl' => 25,
-            'timestamp' => time()
+                'h'          => '',
+                'otp'        => $otp,
+                'status'     => 'OK',
+                'nonce'      => $nonce,
+                'inputNonce' => $nonce,
+                'inputOtp'   => $otp,
+                'host'       => 'api.yubico.com',
+                'sl'         => 25,
+                'timestamp'  => time()
             ]
         );
+
         return new ResponseCollection([$result]);
     }
 

@@ -4,9 +4,8 @@ namespace Firesphere\YubiAuth;
 
 use LogicException;
 use SilverStripe\Core\Environment;
-use SilverStripe\Forms\PasswordField;
-use SilverStripe\Security\MemberAuthenticator\MemberLoginForm as MemberLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
+use SilverStripe\Security\MemberAuthenticator\MemberLoginForm as MemberLoginForm;
 
 class YubikeyLoginForm extends MemberLoginForm
 {
@@ -15,10 +14,10 @@ class YubikeyLoginForm extends MemberLoginForm
      * YubikeyLoginForm constructor.
      *
      * @param LoginHandler $handler
-     * @param string       $name
-     * @param null         $fields
-     * @param null         $actions
-     * @param bool         $checkCurrentUser
+     * @param string $name
+     * @param null $fields
+     * @param null $actions
+     * @param bool $checkCurrentUser
      */
     public function __construct(
         $handler,

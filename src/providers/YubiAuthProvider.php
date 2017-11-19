@@ -32,54 +32,6 @@ abstract class YubiAuthProvider
     }
 
     /**
-     * Check if the yubikey is unique and linked to the member trying to logon
-     *
-     * @param  Member $member
-     * @param  string $yubiFingerprint
-     * @return ValidationResult|bool
-     */
-    public static function validateYubikey(Member $member, $yubiFingerprint)
-    {
-        $yubikeyMembers = Member::get()->filter(array('Yubikey' => $yubiFingerprint));
-        // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
-        if ($yubikeyMembers->count() > 1) {
-            $validationResult = ValidationResult::create();
-            $validationResult->addError(
-                _t(
-                    'YubikeyAuthenticator.DUPLICATE',
-                    'Yubikey is duplicate, contact your administrator as soon as possible!'
-                )
-            );
-            $member->registerFailedLogin();
-
-            return $validationResult;
-        }
-        if (!$yubikeyMembers->count() || $yubikeyMembers->first()->ID !== $member->ID) {
-            $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCH', 'Yubikey does not match found member'));
-            $member->registerFailedLogin();
-
-            return $validationResult;
-        }
-        // If the member has a yubikey ID set, compare it to the fingerprint.
-        if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
-            $member->registerFailedLogin();
-            $validationResult = ValidationResult::create();
-            $validationResult->addError(
-                _t(
-                    'YubikeyAuthenticator.NOMATCH',
-                    'Yubikey fingerprint does not match found member'
-                )
-            );
-
-            return $validationResult; // Yubikey id doesn't match the member.
-        }
-
-        return true;
-    }
-
-
-    /**
      * Check if a member is allowed to login without a yubikey
      *
      * @param  Member $member
@@ -134,5 +86,52 @@ abstract class YubiAuthProvider
         }
 
         return $member;
+    }
+
+    /**
+     * Check if the yubikey is unique and linked to the member trying to logon
+     *
+     * @param  Member $member
+     * @param  string $yubiFingerprint
+     * @return ValidationResult|bool
+     */
+    public static function validateYubikey(Member $member, $yubiFingerprint)
+    {
+        $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
+        // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
+        if ($yubikeyMembers->count() > 1) {
+            $validationResult = ValidationResult::create();
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.DUPLICATE',
+                    'Yubikey is duplicate, contact your administrator as soon as possible!'
+                )
+            );
+            $member->registerFailedLogin();
+
+            return $validationResult;
+        }
+        if (!$yubikeyMembers->count() || $yubikeyMembers->first()->ID !== $member->ID) {
+            $validationResult = ValidationResult::create();
+            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCH', 'Yubikey does not match found member'));
+            $member->registerFailedLogin();
+
+            return $validationResult;
+        }
+        // If the member has a yubikey ID set, compare it to the fingerprint.
+        if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
+            $member->registerFailedLogin();
+            $validationResult = ValidationResult::create();
+            $validationResult->addError(
+                _t(
+                    'YubikeyAuthenticator.NOMATCH',
+                    'Yubikey fingerprint does not match found member'
+                )
+            );
+
+            return $validationResult; // Yubikey id doesn't match the member.
+        }
+
+        return true;
     }
 }

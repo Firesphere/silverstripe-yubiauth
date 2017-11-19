@@ -39,7 +39,7 @@ class QwertyConvertor
         $yubiString = strtolower($yubiString);
         /* The string is Dvorak, convert it to QWERTY */
         if (strpos($yubiString, 'jjjjjj') === 0) {
-            return self::convertToQwerty($yubiString, 'dvorak');
+            return self::convertToQwerty($yubiString, static::$dvorak);
         }
         /* Azerty has some odd characters which we can use to detect it */
         if (
@@ -47,7 +47,7 @@ class QwertyConvertor
             strpos($yubiString, '¨') !== false ||
             strpos($yubiString, '$') !== false
         ) {
-            return self::convertToQwerty($yubiString, 'azerty');
+            return self::convertToQwerty($yubiString, static::$azerty);
         }
 
         return $yubiString;
@@ -55,7 +55,7 @@ class QwertyConvertor
 
     /**
      * @param string $originalString
-     * @param string $from           Origin we have to convert from
+     * @param string $from Origin we have to convert from
      *
      * @return string
      */
@@ -63,7 +63,7 @@ class QwertyConvertor
     {
         $originalArray = str_split($originalString);
         $qwerty = str_split(self::$qwerty);
-        $from = str_split(self::$$from);
+        $from = str_split($from);
         $return = '';
         foreach ($originalArray as $item) {
             $return .= $qwerty[array_search($item, $from, true)];

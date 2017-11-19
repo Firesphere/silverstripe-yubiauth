@@ -3,7 +3,6 @@
 namespace Firesphere\YubiAuth;
 
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
 use SilverStripe\Security\LoginForm;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler as MemberLoginHandler;

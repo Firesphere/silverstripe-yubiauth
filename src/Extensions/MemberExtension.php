@@ -2,7 +2,6 @@
 
 namespace Firesphere\YubiAuth;
 
-use SilverStripe\Core\Extensible;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\NumericField;
@@ -11,7 +10,7 @@ use SilverStripe\ORM\DataExtension;
 
 /**
  * Class YubiAuthMemberExtension
- * 
+ *
  * Enable yubikey authentication disabling temporarily
  *
  * @property boolean $YubiAuthEnabled
@@ -21,19 +20,19 @@ use SilverStripe\ORM\DataExtension;
 class MemberExtension extends DataExtension
 {
 
-    private static $db = array(
+    private static $db = [
         'YubiAuthEnabled' => 'Boolean(true)',
         'Yubikey'         => 'Varchar(16)',
         'NoYubikeyCount'  => 'Int'
-    );
+    ];
 
-    private static $defaults = array(
+    private static $defaults = [
         'YubiAuthEnabled' => true
-    );
+    ];
 
-    private static $indexes = array(
+    private static $indexes = [
         'Yubikey' => 'unique("Yubikey")' // The Yubikey Signature is unique for every Yubikey.
-    );
+    ];
 
     /**
      * @inheritdoc
