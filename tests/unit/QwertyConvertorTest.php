@@ -15,7 +15,6 @@ use SilverStripe\Dev\SapphireTest;
  */
 class QwertyConvertorTest extends SapphireTest
 {
-
     public function testCapitalisationConversion()
     {
         $string = QwertyConvertor::convertString('CCCCCCFINFGRTJHDEITNIRLNGGBICVNNTHETHDLJLCVL');

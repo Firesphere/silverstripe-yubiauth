@@ -19,7 +19,6 @@ use SilverStripe\ORM\DataExtension;
  */
 class MemberExtension extends DataExtension
 {
-
     private static $db = [
         'YubiAuthEnabled' => 'Boolean(true)',
         'Yubikey'         => 'Varchar(16)',
@@ -74,7 +73,6 @@ class MemberExtension extends DataExtension
         );
 
         $fields->addFieldsToTab('Root.Main', [$yubiCount, $yubiField, $yubiAuth], 'DirectGroups');
-
     }
 
     /**
@@ -88,5 +86,4 @@ class MemberExtension extends DataExtension
             $this->owner->Yubikey = '';
         }
     }
-
 }

@@ -23,7 +23,6 @@ use Yubikey\Validate;
  */
 class YubiAuthenticatorTest extends SapphireTest
 {
-
     protected static $fixture_file = '../fixtures/Member.yml';
 
     /**
@@ -48,8 +47,10 @@ class YubiAuthenticatorTest extends SapphireTest
         $this->objFromFixture(Member::class, 'admin');
         $validator = new MockYubiValidate('apikey', '1234');
         $this->authenticator = Injector::inst()->get(YubikeyMemberAuthenticator::class);
-        $this->handler = Injector::inst()->createWithArgs(YubikeyLoginHandler::class,
-            [Security::login_url(), $this->authenticator]);
+        $this->handler = Injector::inst()->createWithArgs(
+            YubikeyLoginHandler::class,
+            [Security::login_url(), $this->authenticator]
+        );
         $this->form = Injector::inst()->get(
             YubikeyLoginForm::class,
             true,
@@ -129,7 +130,8 @@ class YubiAuthenticatorTest extends SapphireTest
             $this->form,
             $request
         );
-        $this->handler->validateYubikey([
+        $this->handler->validateYubikey(
+            [
             // This OTP is _not_ valid in real situations
             'yubiauth' => 'jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn'
         ],
@@ -172,5 +174,4 @@ class YubiAuthenticatorTest extends SapphireTest
         $member = Member::get()->filter(array('Email' => 'admin@silverstripe.com'))->first();
         $this->assertGreaterThan($failedLoginCount, $member->FailedLoginCount);
     }
-
 }

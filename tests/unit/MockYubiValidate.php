@@ -6,10 +6,8 @@ use Yubikey\Response;
 use Yubikey\ResponseCollection;
 use Yubikey\Validate;
 
-
 class MockYubiValidate extends Validate
 {
-
     public function check($otp, $multi = false)
     {
         $nonce = $this->generateNonce();
@@ -29,5 +27,4 @@ class MockYubiValidate extends Validate
 
         return new ResponseCollection([$result]);
     }
-
 }

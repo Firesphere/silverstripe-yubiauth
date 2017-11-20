@@ -2,7 +2,6 @@
 
 namespace Firesphere\YubiAuth;
 
-
 use DateTime;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\ValidationResult;
@@ -65,7 +64,6 @@ abstract class YubiAuthProvider
      */
     public static function checkNoYubiDays(Member $member)
     {
-
         $date1 = new DateTime($member->Created);
         $date2 = new DateTime(date('Y-m-d'));
 

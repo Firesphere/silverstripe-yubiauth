@@ -2,7 +2,6 @@
 
 namespace Firesphere\YubiAuth;
 
-
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormAction;
@@ -13,7 +12,6 @@ use SilverStripe\Security\LoginForm;
 
 class YubikeyForm extends LoginForm
 {
-
     public function __construct(
         RequestHandler $controller = null,
         $name = self::DEFAULT_NAME

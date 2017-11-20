@@ -11,7 +11,6 @@ use SilverStripe\Security\Security;
 
 class YubikeyLoginHandler extends MemberLoginHandler
 {
-
     private static $url_handlers = [
         'yubikey-authentication' => 'secondFactor'
     ];
@@ -54,7 +53,6 @@ class YubikeyLoginHandler extends MemberLoginHandler
             return $this->redirect($this->link('yubikey-authentication'));
         }
         $this->redirectBack();
-
     }
 
     public function secondFactor()

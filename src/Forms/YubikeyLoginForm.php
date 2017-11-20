@@ -46,5 +46,4 @@ class YubikeyLoginForm extends MemberLoginForm
     {
         return _t('YubikeyLoginForm.TITLE', 'Yubikey Login');
     }
-
 }
