@@ -1,3 +1,8 @@
+---
+Name: yubiauthextension
+After:
+  - '#cmsextensions'
+---
 SilverStripe\Security\Member:
   extensions:
     - Firesphere\YubiAuth\MemberExtension
