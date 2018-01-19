@@ -1,23 +1,25 @@
 <?php
 
-namespace Firesphere\YubiAuth;
+namespace Firesphere\YubiAuth\Forms;
 
+use Firesphere\BootstrapMFA\Forms\BootstrapMFALoginForm;
 use LogicException;
 use SilverStripe\Core\Environment;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
-use SilverStripe\Security\MemberAuthenticator\MemberLoginForm as MemberLoginForm;
 
-class YubikeyLoginForm extends MemberLoginForm
+class YubikeyLoginForm extends BootstrapMFALoginForm
 {
 
     /**
      * YubikeyLoginForm constructor.
      *
      * @param LoginHandler $handler
+     * @param string $authenticatorClass
      * @param string $name
      * @param null $fields
      * @param null $actions
      * @param bool $checkCurrentUser
+     * @throws \LogicException
      */
     public function __construct(
         $handler,

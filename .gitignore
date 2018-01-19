@@ -1,0 +1,9 @@
+/vendor
+/mysite
+/install.php
+/index.php
+/install-frameworkmissing.html
+/assets
+/resources
+/.htaccess
+/web.config

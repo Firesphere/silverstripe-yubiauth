@@ -1,18 +1,21 @@
 <?php
 
-namespace Firesphere\YubiAuth;
+namespace Firesphere\YubiAuth\Providers;
 
 use DateTime;
+use Firesphere\BootstrapMFA\Providers\BootstrapMFAProvider;
+use Firesphere\BootstrapMFA\Providers\MFAProvider;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
 
 /**
- * Class YubiAuthProvider
+ * Class YubikeyAuthProvider
  *
  * @package Firesphere\YubiAuth
  */
-abstract class YubiAuthProvider
+class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
 {
     use Configurable;
 
@@ -20,11 +23,11 @@ abstract class YubiAuthProvider
      * @param Member $member
      * @return ValidationResult|Member
      */
-    public static function checkNoYubiAttempts(Member $member)
+    public function checkNoYubiAttempts(Member $member)
     {
-        $noYubiLogins = self::checkNoYubiLogins($member);
+        $noYubiLogins = $this->checkNoYubiLogins($member);
         if ($noYubiLogins instanceof Member) {
-            return self::checkNoYubiDays($member);
+            return $this->checkNoYubiDays($member);
         }
 
         return $noYubiLogins;
@@ -36,9 +39,9 @@ abstract class YubiAuthProvider
      * @param  Member $member
      * @return ValidationResult|Member
      */
-    public static function checkNoYubiLogins(Member $member)
+    public function checkNoYubiLogins(Member $member)
     {
-        $maxNoYubi = self::config()->get('MaxNoYubiLogin');
+        $maxNoYubi = static::config()->get('MaxNoYubiLogin');
         if ($maxNoYubi > 0 && $maxNoYubi <= $member->NoYubikeyCount) {
             $validationResult = ValidationResult::create();
             $validationResult->addError(
@@ -62,13 +65,13 @@ abstract class YubiAuthProvider
      * @param  Member $member
      * @return ValidationResult|Member
      */
-    public static function checkNoYubiDays(Member $member)
+    public function checkNoYubiDays(Member $member)
     {
         $date1 = new DateTime($member->Created);
         $date2 = new DateTime(date('Y-m-d'));
 
         $diff = $date2->diff($date1)->format("%a");
-        $maxNoYubiDays = self::config()->get('MaxNoYubiLoginDays');
+        $maxNoYubiDays = static::config()->get('MaxNoYubiLoginDays');
 
         if ($maxNoYubiDays > 0 && $diff >= $maxNoYubiDays) {
             $validationResult = ValidationResult::create();
@@ -91,14 +94,38 @@ abstract class YubiAuthProvider
      *
      * @param  Member $member
      * @param  string $yubiFingerprint
-     * @return ValidationResult|bool
+     * @return ValidationResult
      */
-    public static function validateYubikey(Member $member, $yubiFingerprint)
+    public function validateToken(Member $member, $yubiFingerprint)
     {
+        /** @var DataList|Member[] $yubikeyMembers */
         $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
+
+        /** @var ValidationResult $validationResult */
+        $validationResult = ValidationResult::create();
+
+        $this->validateMemberCount($member, $yubikeyMembers, $validationResult);
         // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
+        $this->validateMemberID($member, $yubikeyMembers, $validationResult);
+
+        // If the member has a yubikey ID set, compare it to the fingerprint.
+        $this->validateFingerprint($member, $yubiFingerprint, $validationResult);
+
+
+        return $validationResult;
+    }
+
+    /**
+     * @param Member $member
+     * @param DataList|Member[] $yubikeyMembers
+     * @param ValidationResult $validationResult
+     */
+    protected function validateMemberCount(
+        Member $member,
+        DataList $yubikeyMembers,
+        ValidationResult $validationResult
+    ) {
         if ($yubikeyMembers->count() > 1) {
-            $validationResult = ValidationResult::create();
             $validationResult->addError(
                 _t(
                     'YubikeyAuthenticator.DUPLICATE',
@@ -106,30 +133,37 @@ abstract class YubiAuthProvider
                 )
             );
             $member->registerFailedLogin();
-
-            return $validationResult;
         }
-        if (!$yubikeyMembers->count() || $yubikeyMembers->first()->ID !== $member->ID) {
-            $validationResult = ValidationResult::create();
-            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCH', 'Yubikey does not match found member'));
-            $member->registerFailedLogin();
+    }
 
-            return $validationResult;
-        }
-        // If the member has a yubikey ID set, compare it to the fingerprint.
-        if ($member->Yubikey && strpos($yubiFingerprint, $member->Yubikey) !== 0) {
+    /**
+     * @param Member $member
+     * @param DataList|Member[] $yubikeyMembers
+     * @param ValidationResult $validationResult
+     */
+    protected function validateMemberID(Member $member, DataList $yubikeyMembers, ValidationResult $validationResult)
+    {
+        if ((int)$yubikeyMembers->count() === 1 && (int)$yubikeyMembers->first()->ID !== (int)$member->ID) {
+            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCHID', 'Yubikey does not match found member ID'));
             $member->registerFailedLogin();
-            $validationResult = ValidationResult::create();
+        }
+    }
+
+    /**
+     * @param Member $member
+     * @param $fingerPrint
+     * @param ValidationResult $validationResult
+     */
+    protected function validateFingerprint(Member $member, $fingerPrint, ValidationResult $validationResult)
+    {
+        if ($member->Yubikey && strpos($fingerPrint, $member->Yubikey) !== 0) {
+            $member->registerFailedLogin();
             $validationResult->addError(
                 _t(
                     'YubikeyAuthenticator.NOMATCH',
                     'Yubikey fingerprint does not match found member'
                 )
             );
-
-            return $validationResult; // Yubikey id doesn't match the member.
         }
-
-        return true;
     }
 }

@@ -1,9 +1,9 @@
 ---
 Name: YubiAuth
 ---
-Firesphere\YubiAuth\YubikeyAuthenticator:
+Firesphere\YubiAuth\Authenticators\YubikeyAuthenticator:
   AuthURL: ''
-Firesphere\YubiAuth\YubiAuthProvider:
+Firesphere\YubiAuth\Providers\YubikeyAuthProvider:
   MaxNoYubiLogin: 25
   MaxNoYubiLoginDays: 5
 # Copy the part below and uncomment it to enable the yubikey authentication.
@@ -12,4 +12,4 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Security\Security:
     properties:
       Authenticators:
-        yubikey: %$Firesphere\YubiAuth\YubikeyMemberAuthenticator
+        yubikey: %$Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator

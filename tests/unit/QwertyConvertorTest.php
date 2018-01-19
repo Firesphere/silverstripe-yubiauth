@@ -2,7 +2,7 @@
 
 namespace Firesphere\YubiAuth\Tests;
 
-use Firesphere\YubiAuth\QwertyConvertor;
+use Firesphere\YubiAuth\Helpers\QwertyConvertor;
 use PHPUnit_Framework_TestCase;
 use SilverStripe\Dev\SapphireTest;
 
@@ -25,5 +25,17 @@ class QwertyConvertorTest extends SapphireTest
     {
         $string = QwertyConvertor::convertString('jjjjjjucbuipyhde.cybcpnbiixcjkbbyd.ydenhnjkn');
         $this->assertEquals('ccccccfinfgrtjhdeitnirlnggbicvnnthethdljlcvl', $string);
+    }
+
+    public function testAzertyConversion()
+    {
+        $string = QwertyConvertor::convertString('ccccccfinfgrtjhdeitnirl°ggbicvnnthethdljlcvl');
+        $this->assertEquals('vvvvvvfimfgrtjhdeitmirl+Qggnivbmmthethdljlvbl', $string);
+        $string = QwertyConvertor::convertString('ccccccfinfgrtjhdeitnirl¨ggbicvnnthethdljlcvl');
+        $this->assertEquals('vvvvvvfimfgrtjhdeitmirl+Sggnivbmmthethdljlvbl', $string);
+        $string = QwertyConvertor::convertString('ccccccfinfgrtjhdeitnirl$ggbicvnnthethdljlcvl');
+        $this->assertEquals('vvvvvvfimfgrtjhdeitmirl]ggnivbmmthethdljlvbl', $string);
+        $string = QwertyConvertor::convertString('ccccccfinfgrtjhdeitnirl$°gb¨cvnnthethdljlcvl');
+        $this->assertEquals('vvvvvvfimfgrtjhdeitmirl]+Qgn+Svbmmthethdljlvbl', $string);
     }
 }

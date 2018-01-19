@@ -1,17 +1,22 @@
 <?php
 
-namespace Firesphere\YubiAuth;
+namespace Firesphere\YubiAuth\Authenticators;
 
 use Exception;
-use Firesphere\BootstrapMFA\BootstrapMFAAuthenticator;
+use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
+use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
+use Firesphere\YubiAuth\Handlers\YubikeyLoginHandler;
+use Firesphere\YubiAuth\Helpers\QwertyConvertor;
+use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use SilverStripe\Security\PasswordEncryptor_NotFoundException;
 use Yubikey\Response;
 use Yubikey\Validate;
 
@@ -27,7 +32,28 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      * @var Validate
      */
     protected $yubiService;
+
+    /**
+     * @var YubikeyAuthProvider
+     */
+    protected $provider;
+
+    /**
+     * @var string
+     */
     private $authenticatorName = 'yubiauth';
+
+    /**
+     * Set the provider to a YubikeyAuthProvider instance
+     *
+     * YubikeyMemberAuthenticator constructor.
+     */
+    public function __construct()
+    {
+        if (!$this->provider) {
+            $this->provider = Injector::inst()->get(YubikeyAuthProvider::class);
+        }
+    }
 
     /**
      * Name of this authenticator
@@ -37,6 +63,25 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
     public static function get_name()
     {
         return _t('YubikeyAuthenticator.TITLE', 'Yubikey 2 factor login');
+    }
+
+    /**
+     * @return YubikeyAuthProvider
+     */
+    public function getProvider()
+    {
+        return $this->provider;
+    }
+
+    /**
+     * @param YubikeyAuthProvider $provider
+     * @return $this
+     */
+    public function setProvider($provider)
+    {
+        $this->provider = $provider;
+
+        return $this;
     }
 
     public function supportedServices()
@@ -51,43 +96,37 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      *
      * @param array $data
      * @param HTTPRequest $request
-     * @param $message
+     * @param ValidationResult $validationResult
      *
-     * @return null|Member
+     * @return ValidationResult|Member
+     * @throws ValidationException
+     * @throws PasswordEncryptor_NotFoundException
      */
-    public function validateYubikey($data, $request, &$message)
+    public function validateToken($data, $request, &$validationResult = null)
     {
-        $memberID = $request->getSession()->get('YubikeyLoginHandler.MemberID');
+        if (!$validationResult instanceof ValidationResult) {
+            $validationResult = ValidationResult::create();
+        }
+
+        $memberID = $request->getSession()->get(BootstrapMFALoginHandler::SESSION_KEY . '.MemberID');
         // First, let's see if we know the member
-        /** @var Member $member */
+        /** @var Member|null $member */
         $member = Member::get()->filter(['ID' => $memberID])->first();
 
         // Continue if we have a valid member
         if ($member && $member instanceof Member) {
 
             // We do not have to check the YubiAuth for now.
-            if (!$member->YubiAuthEnabled && empty($data['yubiauth'])) {
+            if (!$member->MFAEnabled && empty($data['yubiauth'])) {
                 return $this->authenticateNoYubikey($member);
             }
 
             // If we know the member, and it's YubiAuth enabled, continue.
-            if (!empty($data['yubiauth'])) {
-                /** @var Validate $service */
-                $this->yubiService = Injector::inst()->createWithArgs(
-                    Validate::class,
-                    [
-                        Environment::getEnv('YUBIAUTH_APIKEY'),
-                        Environment::getEnv('YUBIAUTH_CLIENTID'),
-                    ]
-                );
-
-                return $this->authenticateYubikey($data, $member);
-            }
-            $member->registerFailedLogin();
-            $message = 'Yubikey Authentication error';
+            return $this->checkYubikey($data, $member);
         }
 
-        return null;
+        $validationResult->addError(_t(__CLASS__ . '.MEMBERNOTFOUND', 'Could not identify member'));
+        return $validationResult;
     }
 
     /**
@@ -96,17 +135,39 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      *
      * @param  Member $member
      * @return ValidationResult|Member
+     * @throws ValidationException
      */
     private function authenticateNoYubikey($member)
     {
         ++$member->NoYubikeyCount;
         $member->write();
-        $yubiAuthNoYubi = YubiAuthProvider::checkNoYubiAttempts($member);
+        $yubiAuthNoYubi = $this->provider->checkNoYubiAttempts($member);
         if ($yubiAuthNoYubi instanceof ValidationResult) {
             return $yubiAuthNoYubi;
         }
 
         return $member;
+    }
+
+    /**
+     * @param $data
+     * @param $member
+     * @return ValidationResult|Member
+     * @throws ValidationException
+     * @throws PasswordEncryptor_NotFoundException
+     */
+    protected function checkYubikey($data, $member)
+    {
+        /** @var Validate $service */
+        $this->yubiService = Injector::inst()->createWithArgs(
+            Validate::class,
+            [
+                Environment::getEnv('YUBIAUTH_APIKEY'),
+                Environment::getEnv('YUBIAUTH_CLIENTID'),
+            ]
+        );
+
+        return $this->authenticateYubikey($data, $member);
     }
 
     /**
@@ -116,6 +177,8 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      * @param  array $data
      * @param  Member $member
      * @return ValidationResult|Member
+     * @throws ValidationException
+     * @throws PasswordEncryptor_NotFoundException
      */
     private function authenticateYubikey($data, $member)
     {
@@ -124,12 +187,14 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         }
         $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
+        $validationResult = ValidationResult::create();
+
         if ($member->Yubikey) {
-            $validateYubiMember = YubiAuthProvider::validateYubikey($member, $yubiFingerprint);
-            if ($validateYubiMember instanceof ValidationResult) {
+            $validationResult = $this->provider->validateToken($member, $yubiFingerprint);
+            if (!$validationResult->isValid()) {
                 $member->registerFailedLogin();
 
-                return $validateYubiMember;
+                return $validationResult;
             }
         }
         try {
@@ -137,7 +202,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             $result = $this->yubiService->check($yubiCode);
             $this->updateMember($member, $yubiFingerprint);
         } catch (Exception $e) {
-            $validationResult = ValidationResult::create();
             $validationResult->addError($e->getMessage());
 
             $member->registerFailedLogin();
@@ -165,14 +229,15 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      *
      * @param Member $member
      * @param string $yubiString The Identifier String of the Yubikey
+     * @throws ValidationException
      */
     private function updateMember($member, $yubiString)
     {
         $member->registerSuccessfulLogin();
         $member->NoYubikeyCount = 0;
 
-        if (!$member->YubiAuthEnabled) {
-            $member->YubiAuthEnabled = true;
+        if (!$member->MFAEnabled) {
+            $member->MFAEnabled = true;
         }
         if (!$member->Yubikey) {
             $member->Yubikey = $yubiString;
@@ -180,7 +245,10 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         $member->write();
     }
 
-
+    /**
+     * @param string $link
+     * @return \SilverStripe\Security\MemberAuthenticator\LoginHandler|static
+     */
     public function getLoginHandler($link)
     {
         return YubikeyLoginHandler::create($link, $this);

@@ -5,4 +5,4 @@ After:
 ---
 SilverStripe\Security\Member:
   extensions:
-    - Firesphere\YubiAuth\MemberExtension
+    - Firesphere\YubiAuth\Extensions\MemberExtension
