@@ -3,6 +3,7 @@
 namespace Firesphere\YubiAuth;
 
 use Exception;
+use Firesphere\BootstrapMFA\BootstrapMFAAuthenticator;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Environment;
@@ -19,7 +20,7 @@ use Yubikey\Validate;
  *
  * Enable Yubikey Authentication for SilverStripe CMS and member-protected pages.
  */
-class YubikeyMemberAuthenticator extends MemberAuthenticator
+class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
 {
 
     /**

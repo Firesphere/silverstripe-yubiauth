@@ -2,14 +2,14 @@
 
 namespace Firesphere\YubiAuth;
 
+use Firesphere\BootstrapMFA\MFALoginHandler;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Security\LoginForm;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\LoginHandler as MemberLoginHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Security\Security;
 
-class YubikeyLoginHandler extends MemberLoginHandler
+class YubikeyLoginHandler extends MFALoginHandler
 {
     private static $url_handlers = [
         'yubikey-authentication' => 'secondFactor'
@@ -65,6 +65,11 @@ class YubikeyLoginHandler extends MemberLoginHandler
         return YubikeyForm::create($this, 'yubikeyForm');
     }
 
+    public function MFAForm()
+    {
+        return $this->yubikeyForm();
+    }
+
     /**
      * @param array $data
      * @param YubikeyForm $form
@@ -78,6 +83,12 @@ class YubikeyLoginHandler extends MemberLoginHandler
         $memberData = $session->get('YubikeyLoginHandler.Data');
         $this->request['BackURL'] = !empty($memberData['BackURL']) ? $memberData['BackURL'] : '';
         $member = $this->authenticator->validateYubikey($data, $request, $message);
+        if (!$member instanceof Member) {
+            $field = Member::config()->get('unique_identifier_field');
+            $tmpMember = Member::get()->filter([$field => $memberData['Email']])->first();
+            $member = $this->authenticator->validateBackupCode($tmpMember, $data['yubiauth']);
+        }
+
         if ($member instanceof Member) {
             $memberData = $session->get('YubikeyLoginHandler.Data');
             $this->performLogin($member, $memberData, $request);
