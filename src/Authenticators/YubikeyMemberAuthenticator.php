@@ -16,7 +16,7 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\PasswordEncryptor_NotFoundException;
+use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 use Yubikey\Response;
 use Yubikey\Validate;
 
@@ -84,6 +84,9 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function supportedServices()
     {
         // Bitwise-OR of all the supported services in this Authenticator, to make a bitmask
@@ -100,7 +103,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      *
      * @return ValidationResult|Member
      * @throws ValidationException
-     * @throws PasswordEncryptor_NotFoundException
      */
     public function validateToken($data, $request, &$validationResult = null)
     {
@@ -114,9 +116,9 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         $member = Member::get()->filter(['ID' => $memberID])->first();
 
         // Continue if we have a valid member
-        if ($member && $member instanceof Member) {
+        if ($member instanceof Member) {
 
-            // We do not have to check the YubiAuth for now.
+            // We do not have to check the YubiAuth for this situation.
             if (!$member->MFAEnabled && empty($data['yubiauth'])) {
                 return $this->authenticateNoYubikey($member);
             }
@@ -126,6 +128,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         }
 
         $validationResult->addError(_t(__CLASS__ . '.MEMBERNOTFOUND', 'Could not identify member'));
+
         return $validationResult;
     }
 
@@ -154,7 +157,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      * @param $member
      * @return ValidationResult|Member
      * @throws ValidationException
-     * @throws PasswordEncryptor_NotFoundException
      */
     protected function checkYubikey($data, $member)
     {
@@ -174,11 +176,13 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      * Validate a member plus it's yubikey login. It compares the fingerprintt and after that,
      * tries to validate the Yubikey string
      *
+     * @todo improve this, it's a bit overly complicated
+     * @todo use the ValidationResult as e reference instead of returning
+     *
      * @param  array $data
      * @param  Member $member
      * @return ValidationResult|Member
      * @throws ValidationException
-     * @throws PasswordEncryptor_NotFoundException
      */
     private function authenticateYubikey($data, $member)
     {
@@ -214,7 +218,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             return $member;
         }
 
-        $validationResult = ValidationResult::create();
         $validationResult->addError(_t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
         $member->registerFailedLogin();
 
@@ -247,7 +250,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
 
     /**
      * @param string $link
-     * @return \SilverStripe\Security\MemberAuthenticator\LoginHandler|static
+     * @return LoginHandler|static
      */
     public function getLoginHandler($link)
     {
