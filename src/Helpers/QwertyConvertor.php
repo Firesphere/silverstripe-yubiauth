@@ -1,6 +1,6 @@
 <?php
 
-namespace Firesphere\YubiAuth;
+namespace Firesphere\YubiAuth\Helpers;
 
 /**
  * @description Helper Class to convert different keyboard layouts to Qwerty before authenticating

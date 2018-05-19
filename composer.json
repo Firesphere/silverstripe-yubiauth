@@ -18,7 +18,8 @@
   ],
   "require": {
     "silverstripe/recipe-cms": "~1.0",
-    "enygma/yubikey": "^3.2"
+    "enygma/yubikey": "^3.2",
+    "firesphere/bootstrapmfa": "1.0.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.7"

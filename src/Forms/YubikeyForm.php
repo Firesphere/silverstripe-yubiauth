@@ -1,6 +1,6 @@
 <?php
 
-namespace Firesphere\YubiAuth;
+namespace Firesphere\YubiAuth\Forms;
 
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
@@ -43,7 +43,7 @@ class YubikeyForm extends LoginForm
     {
         $action = FieldList::create(
             [
-                FormAction::create('validateYubikey', 'Validate')
+                FormAction::create('validateToken', 'Validate')
             ]
         );
 
@@ -52,6 +52,6 @@ class YubikeyForm extends LoginForm
 
     public function getAuthenticatorName()
     {
-        return _t('YubikeyLoginForm.TITLE', 'Yubikey authentication');
+        return _t('YubikeyForm.TITLE', 'Yubikey authentication');
     }
 }

@@ -34,10 +34,35 @@ jobs:
             php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             php -r "unlink('composer-setup.php');"
 
-      - run: composer create-project firesphere/yubiauth:dev-master ~/var/www -n
+      - run: cd ~/var/www
+      - checkout
       - run: cp ~/var/www/_config/config.yml.example ~/var/www/_config/config.yml
+      # Composer Cache, Yarn and non-vendor modules
+      - restore_cache:
+          keys:
+            - v2-cache-{{ checksum "composer.lock" }}-{{ checksum "README.md" }}
+            # fallback to using the latest cache if no exact match is found
+            - v2-cache-
+      # update, because why not
+      - run: composer update
+      - run: cp -r vendor/silverstripe/recipe-cms/mysite .
+      # Save all dependencies to cache
+      - save_cache:
+          key: v2-cache-{{ checksum "composer.lock" }}-{{ checksum "README.md" }}
+          paths:
+            - assets
+            - vendor
+            - mysite
+
       - run: vendor/bin/sake dev/build
 
       # run tests!
-      - run: vendor/bin/phpunit --coverage-clover=coverage.xml -d memory_limit=512M tests/unit
+      - run: vendor/bin/phpunit --coverage-html ./coverage/ --log-junit ./coverage/junit.xml --coverage-clover=coverage.xml -d memory_limit=512M tests/unit
       - run: bash <(curl -s https://codecov.io/bash) -f coverage.xml
+      - store_test_results:
+          path: ~/var/www/coverage
+      - store_artifacts:
+          path: ~/var/www/coverage
+          destination: phpunit
+
+

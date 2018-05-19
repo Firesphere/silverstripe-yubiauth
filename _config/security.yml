@@ -1,7 +1,9 @@
 ---
 Name: yubiauthsecurity
 After:
-  - '#coresecurity'
+  - '#MFAAuthenticator'
 ---
-Firesphere\YubiAuth\YubikeyLoginForm:
-  authenticator_class: Firesphere\YubiAuth\YubikeyAuthenticator
+Firesphere\YubiAuth\Forms\YubikeyLoginForm:
+  authenticator_class: Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator
+Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator:
+  provider: %$Firesphere\YubiAuth\Providers\YubikeyAuthProvider

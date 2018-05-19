@@ -13,5 +13,4 @@ SilverStripe\Security\Member:
     FirstName: Admin
     Email: admin@silverstripe.com
     Password: password
-    YubiAuthEnabled: false
     Groups: =>SilverStripe\Security\Group.admingroup
