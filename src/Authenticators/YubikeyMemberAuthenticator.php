@@ -204,18 +204,19 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         try {
             /** @var Response $result */
             $result = $this->yubiService->check($yubiCode);
-            $this->updateMember($member, $yubiFingerprint);
+
+            // Only check if the call itself doesn't throw an error
+            if ($result->success() === true) {
+                $this->updateMember($member, $yubiFingerprint);
+
+                return $member;
+            }
         } catch (Exception $e) {
             $validationResult->addError($e->getMessage());
 
             $member->registerFailedLogin();
 
             return $validationResult;
-        }
-        if ($result->success() === true) {
-            $this->updateMember($member, $yubiFingerprint);
-
-            return $member;
         }
 
         $validationResult->addError(_t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
