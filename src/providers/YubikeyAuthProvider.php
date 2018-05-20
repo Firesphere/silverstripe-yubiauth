@@ -127,7 +127,6 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      * @param $member
      * @param ValidationResult $result
      * @return ValidationResult|Member
-     * @throws ValidationException
      */
     public function checkYubikey($data, $member, ValidationResult $result)
     {
