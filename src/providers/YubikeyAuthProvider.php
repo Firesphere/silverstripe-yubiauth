@@ -143,14 +143,16 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      *
      * @param  array $data
      * @param  Member $member
+     * @param ValidationResult $validationResult
      * @return ValidationResult|Member
-     * @throws ValidationException
      */
-    private function authenticateYubikey($data, $member, ValidationResult &$validationResult)
+    private function authenticateYubikey($data, $member, ValidationResult &$validationResult = null)
     {
         $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
-        $validationResult = ValidationResult::create();
+        if (!$validationResult) {
+            $validationResult = ValidationResult::create();
+        }
 
         if ($member->Yubikey) {
             $this->validateToken($member, $yubiFingerprint, $validationResult);
