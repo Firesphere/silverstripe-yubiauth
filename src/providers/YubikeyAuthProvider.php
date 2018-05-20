@@ -46,10 +46,8 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
             ]
         );
 
-        if ($url = Config::inst()->get(self::class, 'AuthURL')) {
-            if (!is_array($url)) {
-                $url = [$url];
-            }
+        if ($url = Config::inst()->get(static::class, 'AuthURL')) {
+            $url = (array)$url;
             $this->service->setHosts($url);
         }
     }

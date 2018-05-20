@@ -13,7 +13,6 @@ use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
-use Yubikey\Validate;
 
 /**
  * Class YubikeyAuthenticator

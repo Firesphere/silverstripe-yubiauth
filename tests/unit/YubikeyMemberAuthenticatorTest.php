@@ -10,7 +10,6 @@ use Firesphere\YubiAuth\Handlers\YubikeyLoginHandler;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Security\IdentityStore;
@@ -43,6 +42,7 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
         parent::setUp();
         $this->objFromFixture(Member::class, 'admin');
         $validator = new MockYubiValidate('apikey', '1234');
+        Injector::inst()->registerService($validator, Validate::class);
         $this->authenticator = Injector::inst()->get(YubikeyMemberAuthenticator::class);
         $this->handler = Injector::inst()->createWithArgs(
             YubikeyLoginHandler::class,
@@ -53,7 +53,6 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
             true,
             [$this->handler, YubikeyMemberAuthenticator::class, '']
         );
-        Injector::inst()->registerService($validator, Validate::class);
     }
 
     public function tearDown()
@@ -81,7 +80,7 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
             $request
         );
         $member = Member::get()->filter(['Email' => 'admin@silverstripe.com'])->first();
-        $this->assertGreaterThan(0, $member->NoYubikeyCount);
+        $this->assertGreaterThan(0, (int)$member->NoYubikeyCount);
         $this->assertEquals(null, $member->Yubikey);
     }
 
@@ -172,47 +171,6 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
         $this->assertGreaterThan($failedCount, $member->FailedLoginCount);
     }
 
-    /**
-     * @todo The mock currently always returns success
-     *
-     * public function testDifferentYubikey()
-     * {
-     * $newMember = Member::create([
-     * 'FirstName'       => 'Pete',
-     * 'Surname'         => 'Lister',
-     * 'Password'        => 'IronMan2005!',
-     * 'MFAEnabled' => true,
-     * 'Yubikey'         => '1234567890abcdef'
-     * ]);
-     * $newMember->write();
-     *
-     * $member = Member::get()->filter(['Email' => 'admin@silverstripe.com'])->first();
-     * $failedCount = $member->FailedLoginCount;
-     * $member->MFAEnabled = true;
-     * $member->write();
-     *
-     * $request = new HTTPRequest('POST', '/');
-     * $request->setSession(new Session(['hi' => 'bye']));
-     * $this->handler->setRequest($request);
-     * $this->handler->doLogin(
-     * [
-     *
-     * 'Email'    => 'admin@silverstripe.com',
-     * 'Password' => 'password',
-     * ],
-     * $this->form,
-     * $request
-     * );
-     * $this->handler->validateToken(
-     * ['yubiauth' => '1234567890abcdefyhde.cybcpnbiixcjkbbyd.ydenhnjkn'],
-     * YubikeyForm::create($this->handler),
-     * $request
-     * );
-     * $member = Member::get()->filter(['Email' => 'admin@silverstripe.com'])->first();
-     * $this->assertGreaterThan($failedCount, $member->FailedLoginCount);
-     * }
-     */
-
     public function testYubikeyAfterSuccess()
     {
         $request = new HTTPRequest('POST', '/');
@@ -263,6 +221,7 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
             YubikeyForm::create($this->handler),
             $request
         );
+
         $result = Security::getCurrentUser();
         $this->assertEquals(Member::class, $result->ClassName);
         $this->assertEquals('ccccccfinfgr', $result->Yubikey);

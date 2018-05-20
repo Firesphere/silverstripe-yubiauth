@@ -5,7 +5,6 @@ namespace Firesphere\YubiAuth\Tests;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
@@ -14,8 +13,8 @@ class YubikeyAuthProviderTest extends SapphireTest
 {
     protected static $fixture_file = '../fixtures/Member.yml';
 
-    /** 
-     * @var ValidationResult 
+    /**
+     * @var ValidationResult
      */
     protected $result;
     /**
@@ -131,7 +130,7 @@ class YubikeyAuthProviderTest extends SapphireTest
         Config::modify()->set(YubikeyAuthProvider::class, 'AuthURL', 'localhost');
 
         /** @var YubikeyAuthProvider $provider */
-        $provider = Injector::inst()->get(YubikeyAuthProvider::class);
+        $provider = Injector::inst()->get(YubikeyAuthProvider::class, false);
 
         $url = $provider->getService()->getHost();
 
@@ -143,7 +142,7 @@ class YubikeyAuthProviderTest extends SapphireTest
         Config::modify()->set(YubikeyAuthProvider::class, 'AuthURL', ['localhost-1', 'localhost-2']);
 
         /** @var YubikeyAuthProvider $provider */
-        $provider = Injector::inst()->get(YubikeyAuthProvider::class);
+        $provider = Injector::inst()->get(YubikeyAuthProvider::class, false);
 
         $url = $provider->getService()->getHost();
 
@@ -154,6 +153,7 @@ class YubikeyAuthProviderTest extends SapphireTest
     {
         $this->provider = Injector::inst()->get(YubikeyAuthProvider::class);
         $this->result = Injector::inst()->get(ValidationResult::class);
+
         return parent::setUp();
     }
 }
