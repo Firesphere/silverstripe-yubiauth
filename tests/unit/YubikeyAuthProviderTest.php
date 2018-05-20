@@ -5,6 +5,7 @@ namespace Firesphere\YubiAuth\Tests;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
@@ -13,6 +14,10 @@ class YubikeyAuthProviderTest extends SapphireTest
 {
     protected static $fixture_file = '../fixtures/Member.yml';
 
+    /** 
+     * @var ValidationResult 
+     */
+    protected $result;
     /**
      * @var YubikeyAuthProvider
      */
@@ -58,10 +63,10 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $result = $this->provider->validateToken($member1, '1234567890');
+        $this->provider->validateToken($member1, '1234567890', $this->result);
 
-        $this->assertInstanceOf(ValidationResult::class, $result);
-        $this->assertFalse($result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $this->result);
+        $this->assertFalse($this->result->isValid());
     }
 
     public function testvalidateTokenID()
@@ -79,10 +84,10 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $result = $this->provider->validateToken($member1, '1234567890');
+        $this->provider->validateToken($member1, '1234567890', $this->result);
 
-        $this->assertInstanceOf(ValidationResult::class, $result);
-        $this->assertFalse($result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $this->result);
+        $this->assertFalse($this->result->isValid());
     }
 
     public function testvalidateTokenNotMatchesMember()
@@ -94,10 +99,10 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member1->write();
 
-        $result = $this->provider->validateToken($member1, '1234567890');
+        $this->provider->validateToken($member1, '1234567890', $this->result);
 
-        $this->assertInstanceOf(ValidationResult::class, $result);
-        $this->assertFalse($result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $this->result);
+        $this->assertFalse($this->result->isValid());
     }
 
     public function testvalidateTokenUnique()
@@ -115,16 +120,16 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $result = $this->provider->validateToken($member1, 'abcdefghij');
+        $this->provider->validateToken($member1, 'abcdefghij', $this->result);
 
-        $this->assertInstanceOf(ValidationResult::class, $result);
-        $this->assertTrue($result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $this->result);
+        $this->assertTrue($this->result->isValid());
     }
 
     protected function setUp()
     {
         $this->provider = Injector::inst()->get(YubikeyAuthProvider::class);
-
+        $this->result = Injector::inst()->get(ValidationResult::class);
         return parent::setUp();
     }
 }

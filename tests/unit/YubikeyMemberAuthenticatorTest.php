@@ -10,6 +10,7 @@ use Firesphere\YubiAuth\Handlers\YubikeyLoginHandler;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Security\IdentityStore;
@@ -322,7 +323,7 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
         $session->set(BootstrapMFALoginHandler::SESSION_KEY . '.MemberID', -100);
         $request->setSession($session);
 
-        $result = $this->authenticator->validateToken(
+        $this->authenticator->validateToken(
             [],
             $request,
             $result

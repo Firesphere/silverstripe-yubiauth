@@ -2,22 +2,17 @@
 
 namespace Firesphere\YubiAuth\Authenticators;
 
-use Exception;
 use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
 use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
 use Firesphere\YubiAuth\Handlers\YubikeyLoginHandler;
-use Firesphere\YubiAuth\Helpers\QwertyConvertor;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
-use Yubikey\Response;
 use Yubikey\Validate;
 
 /**
@@ -124,12 +119,12 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             }
 
             // If we know the member, and it's YubiAuth enabled, continue.
-            return $this->checkYubikey($data, $member);
+            $member = $this->provider->checkYubikey($data, $member, $validationResult);
         }
 
         $validationResult->addError(_t(self::class . '.MEMBERNOTFOUND', 'Could not identify member'));
 
-        return $validationResult;
+        return $member;
     }
 
     /**
@@ -150,103 +145,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
         }
 
         return $member;
-    }
-
-    /**
-     * @param $data
-     * @param $member
-     * @return ValidationResult|Member
-     * @throws ValidationException
-     */
-    protected function checkYubikey($data, $member)
-    {
-        /** @var Validate $service */
-        $this->yubiService = Injector::inst()->createWithArgs(
-            Validate::class,
-            [
-                Environment::getEnv('YUBIAUTH_APIKEY'),
-                Environment::getEnv('YUBIAUTH_CLIENTID'),
-            ]
-        );
-
-        return $this->authenticateYubikey($data, $member);
-    }
-
-    /**
-     * Validate a member plus it's yubikey login. It compares the fingerprintt and after that,
-     * tries to validate the Yubikey string
-     *
-     * @todo improve this, it's a bit overly complicated
-     * @todo use the ValidationResult as e reference instead of returning
-     *
-     * @param  array $data
-     * @param  Member $member
-     * @return ValidationResult|Member
-     * @throws ValidationException
-     */
-    private function authenticateYubikey($data, $member)
-    {
-        if ($url = Config::inst()->get(self::class, 'AuthURL')) {
-            $this->yubiService->setHost($url);
-        }
-        $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
-        $yubiFingerprint = substr($yubiCode, 0, -32);
-        $validationResult = ValidationResult::create();
-
-        if ($member->Yubikey) {
-            $validationResult = $this->provider->validateToken($member, $yubiFingerprint);
-            if (!$validationResult->isValid()) {
-                $member->registerFailedLogin();
-
-                return $validationResult;
-            }
-        }
-        try {
-            /** @var Response $result */
-            $result = $this->yubiService->check($yubiCode);
-
-            // Only check if the call itself doesn't throw an error
-            if ($result->success() === true) {
-                $this->updateMember($member, $yubiFingerprint);
-
-                return $member;
-            }
-        } catch (Exception $e) {
-            $validationResult->addError($e->getMessage());
-
-            $member->registerFailedLogin();
-
-            return $validationResult;
-        }
-
-        $validationResult->addError(_t(self::class . '.ERROR', 'Yubikey authentication error'));
-        $member->registerFailedLogin();
-
-        return $validationResult;
-    }
-
-    /**
-     * Update the member to forcefully enable YubiAuth
-     * Also, register the Yubikey to the member.
-     * Documentation:
-     * https://developers.yubico.com/yubikey-val/Getting_Started_Writing_Clients.html
-     *
-     * @param Member $member
-     * @param string $yubiString The Identifier String of the Yubikey
-     * @throws ValidationException
-     */
-    private function updateMember($member, $yubiString)
-    {
-        $member->registerSuccessfulLogin();
-        $member->NoYubikeyCount = 0;
-
-        if (!$member->MFAEnabled) {
-            $member->MFAEnabled = true;
-        }
-        if (!$member->Yubikey) {
-            $member->Yubikey = $yubiString;
-        }
-        $member->write();
     }
 
     /**

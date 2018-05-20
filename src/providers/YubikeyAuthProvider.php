@@ -5,10 +5,17 @@ namespace Firesphere\YubiAuth\Providers;
 use DateTime;
 use Firesphere\BootstrapMFA\Providers\BootstrapMFAProvider;
 use Firesphere\BootstrapMFA\Providers\MFAProvider;
+use Firesphere\YubiAuth\Helpers\QwertyConvertor;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
+use Yubikey\Response;
+use Yubikey\Validate;
 
 /**
  * Class YubikeyAuthProvider
@@ -18,6 +25,11 @@ use SilverStripe\Security\Member;
 class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
 {
     use Configurable;
+
+    /**
+     * @var Validate
+     */
+    protected $service;
 
     /**
      * @param Member $member
@@ -96,7 +108,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      * @param  string $yubiFingerprint
      * @return ValidationResult
      */
-    public function validateToken(Member $member, $yubiFingerprint)
+    public function validateToken(Member $member, $yubiFingerprint, ValidationResult &$validationResult)
     {
         /** @var DataList|Member[] $yubikeyMembers */
         $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
@@ -110,7 +122,78 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
 
         // If the member has a yubikey ID set, compare it to the fingerprint.
         $this->validateFingerprint($member, $yubiFingerprint, $validationResult);
+    }
 
+    /**
+     * @param $data
+     * @param $member
+     * @param ValidationResult $result
+     * @return ValidationResult|Member
+     * @throws ValidationException
+     */
+    public function checkYubikey($data, $member, ValidationResult $result)
+    {
+        /** @var Validate $service */
+        $this->service = Injector::inst()->createWithArgs(
+            Validate::class,
+            [
+                Environment::getEnv('YUBIAUTH_APIKEY'),
+                Environment::getEnv('YUBIAUTH_CLIENTID'),
+            ]
+        );
+
+        return $this->authenticateYubikey($data, $member, $result);
+    }
+
+    /**
+     * Validate a member plus it's yubikey login. It compares the fingerprintt and after that,
+     * tries to validate the Yubikey string
+     *
+     * @todo improve this, it's a bit overly complicated
+     * @todo use the ValidationResult as e reference instead of returning
+     *
+     * @param  array $data
+     * @param  Member $member
+     * @return ValidationResult|Member
+     * @throws ValidationException
+     */
+    private function authenticateYubikey($data, $member, ValidationResult &$validationResult)
+    {
+        if ($url = Config::inst()->get(self::class, 'AuthURL')) {
+            $this->service->setHost($url);
+        }
+        $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
+        $yubiFingerprint = substr($yubiCode, 0, -32);
+        $validationResult = ValidationResult::create();
+
+        if ($member->Yubikey) {
+            $this->validateToken($member, $yubiFingerprint, $validationResult);
+            if (!$validationResult->isValid()) {
+                $member->registerFailedLogin();
+
+                return $validationResult;
+            }
+        }
+        try {
+            /** @var Response $result */
+            $result = $this->service->check($yubiCode);
+
+            // Only check if the call itself doesn't throw an error
+            if ($result->success() === true) {
+                $this->updateMember($member, $yubiFingerprint);
+
+                return $member;
+            }
+        } catch (Exception $e) {
+            $validationResult->addError($e->getMessage());
+
+            $member->registerFailedLogin();
+
+            return $validationResult;
+        }
+
+        $validationResult->addError(_t(self::class . '.ERROR', 'Yubikey authentication error'));
+        $member->registerFailedLogin();
 
         return $validationResult;
     }
@@ -148,6 +231,32 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
             $member->registerFailedLogin();
         }
     }
+
+
+    /**
+     * Update the member to forcefully enable YubiAuth
+     * Also, register the Yubikey to the member.
+     * Documentation:
+     * https://developers.yubico.com/yubikey-val/Getting_Started_Writing_Clients.html
+     *
+     * @param Member $member
+     * @param string $yubiString The Identifier String of the Yubikey
+     * @throws ValidationException
+     */
+    private function updateMember($member, $yubiString)
+    {
+        $member->registerSuccessfulLogin();
+        $member->NoYubikeyCount = 0;
+
+        if (!$member->MFAEnabled) {
+            $member->MFAEnabled = true;
+        }
+        if (!$member->Yubikey) {
+            $member->Yubikey = $yubiString;
+        }
+        $member->write();
+    }
+
 
     /**
      * @param Member $member
