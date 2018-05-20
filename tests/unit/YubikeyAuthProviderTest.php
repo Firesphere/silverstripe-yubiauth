@@ -14,10 +14,6 @@ class YubikeyAuthProviderTest extends SapphireTest
     protected static $fixture_file = '../fixtures/Member.yml';
 
     /**
-     * @var ValidationResult
-     */
-    protected $result;
-    /**
      * @var YubikeyAuthProvider
      */
     protected $provider;
@@ -49,6 +45,7 @@ class YubikeyAuthProviderTest extends SapphireTest
 
     public function testvalidateTokenDuplicate()
     {
+        $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
             'Yubikey'    => '1234567890',
@@ -62,14 +59,15 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, '1234567890', $this->result);
+        $this->provider->validateToken($member1, '1234567890', $result);
 
-        $this->assertInstanceOf(ValidationResult::class, $this->result);
-        $this->assertFalse($this->result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertFalse($result->isValid());
     }
 
     public function testvalidateTokenID()
     {
+        $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
             'Yubikey'    => '0987654321',
@@ -83,14 +81,15 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, '1234567890', $this->result);
+        $this->provider->validateToken($member1, '1234567890', $result);
 
-        $this->assertInstanceOf(ValidationResult::class, $this->result);
-        $this->assertFalse($this->result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertFalse($result->isValid());
     }
 
     public function testvalidateTokenNotMatchesMember()
     {
+        $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
             'Yubikey'    => 'abcdefghij',
@@ -98,14 +97,15 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member1->write();
 
-        $this->provider->validateToken($member1, '1234567890', $this->result);
+        $this->provider->validateToken($member1, '1234567890', $result);
 
-        $this->assertInstanceOf(ValidationResult::class, $this->result);
-        $this->assertFalse($this->result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertFalse($result->isValid());
     }
 
     public function testvalidateTokenUnique()
     {
+        $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
             'Yubikey'    => 'abcdefghij',
@@ -119,10 +119,10 @@ class YubikeyAuthProviderTest extends SapphireTest
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, 'abcdefghij', $this->result);
+        $this->provider->validateToken($member1, 'abcdefghij', $result);
 
-        $this->assertInstanceOf(ValidationResult::class, $this->result);
-        $this->assertTrue($this->result->isValid());
+        $this->assertInstanceOf(ValidationResult::class, $result);
+        $this->assertTrue($result->isValid());
     }
 
     public function testSingleHost()
@@ -152,7 +152,6 @@ class YubikeyAuthProviderTest extends SapphireTest
     protected function setUp()
     {
         $this->provider = Injector::inst()->get(YubikeyAuthProvider::class);
-        $this->result = Injector::inst()->get(ValidationResult::class);
 
         return parent::setUp();
     }
