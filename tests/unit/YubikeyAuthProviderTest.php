@@ -8,6 +8,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
+use Yubikey\Validate;
 
 class YubikeyAuthProviderTest extends SapphireTest
 {
@@ -17,6 +18,15 @@ class YubikeyAuthProviderTest extends SapphireTest
      * @var YubikeyAuthProvider
      */
     protected $provider;
+
+    public function testSetService()
+    {
+        $service = Injector::inst()->get(Validate::class);
+
+        $this->provider->setService($service);
+
+        $this->assertInstanceOf(Validate::class, $this->provider->getService());
+    }
 
     public function testCheckNoYubikeyDaysZero()
     {
