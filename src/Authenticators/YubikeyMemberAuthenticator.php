@@ -24,11 +24,6 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
 {
 
     /**
-     * @var Validate
-     */
-    protected $yubiService;
-
-    /**
      * @var YubikeyAuthProvider
      */
     protected $provider;

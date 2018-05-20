@@ -1,6 +1,5 @@
 en:
   Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator:
-    ERROR: 'Yubikey authentication error'
     MEMBERNOTFOUND: 'Could not identify member'
     TITLE: 'Yubikey 2 factor login'
   Firesphere\YubiAuth\Extensions\MemberExtension:
@@ -14,6 +13,7 @@ en:
     TITLE: 'Yubikey Login'
   Firesphere\YubiAuth\Providers\YubikeyAuthProvider:
     DUPLICATE: 'Yubikey is duplicate, contact your administrator as soon as possible!'
+    ERROR: 'Yubikey authentication error'
     ERRORMAXYUBIKEY: 'Maximum login without yubikey exceeded'
     ERRORMAXYUBIKEYDAYS: 'Maximum days without yubikey exceeded'
     NOMATCH: 'Yubikey fingerprint does not match found member'

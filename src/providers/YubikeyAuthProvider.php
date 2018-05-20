@@ -3,6 +3,7 @@
 namespace Firesphere\YubiAuth\Providers;
 
 use DateTime;
+use Exception;
 use Firesphere\BootstrapMFA\Providers\BootstrapMFAProvider;
 use Firesphere\BootstrapMFA\Providers\MFAProvider;
 use Firesphere\YubiAuth\Helpers\QwertyConvertor;
@@ -30,6 +31,28 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      * @var Validate
      */
     protected $service;
+
+    /**
+     * Setup
+     */
+    public function __construct()
+    {
+        /** @var Validate $service */
+        $this->service = Injector::inst()->createWithArgs(
+            Validate::class,
+            [
+                Environment::getEnv('YUBIAUTH_APIKEY'),
+                Environment::getEnv('YUBIAUTH_CLIENTID'),
+            ]
+        );
+
+        if ($url = Config::inst()->get(self::class, 'AuthURL')) {
+            if (!is_array($url)) {
+                $url = [$url];
+            }
+            $this->service->setHosts($url);
+        }
+    }
 
     /**
      * @param Member $member
@@ -102,29 +125,6 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
     }
 
     /**
-     * Check if the yubikey is unique and linked to the member trying to logon
-     *
-     * @param  Member $member
-     * @param  string $yubiFingerprint
-     * @return ValidationResult
-     */
-    public function validateToken(Member $member, $yubiFingerprint, ValidationResult &$validationResult)
-    {
-        /** @var DataList|Member[] $yubikeyMembers */
-        $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
-
-        /** @var ValidationResult $validationResult */
-        $validationResult = ValidationResult::create();
-
-        $this->validateMemberCount($member, $yubikeyMembers, $validationResult);
-        // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
-        $this->validateMemberID($member, $yubikeyMembers, $validationResult);
-
-        // If the member has a yubikey ID set, compare it to the fingerprint.
-        $this->validateFingerprint($member, $yubiFingerprint, $validationResult);
-    }
-
-    /**
      * @param $data
      * @param $member
      * @param ValidationResult $result
@@ -133,15 +133,6 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      */
     public function checkYubikey($data, $member, ValidationResult $result)
     {
-        /** @var Validate $service */
-        $this->service = Injector::inst()->createWithArgs(
-            Validate::class,
-            [
-                Environment::getEnv('YUBIAUTH_APIKEY'),
-                Environment::getEnv('YUBIAUTH_CLIENTID'),
-            ]
-        );
-
         return $this->authenticateYubikey($data, $member, $result);
     }
 
@@ -159,9 +150,6 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      */
     private function authenticateYubikey($data, $member, ValidationResult &$validationResult)
     {
-        if ($url = Config::inst()->get(self::class, 'AuthURL')) {
-            $this->service->setHost($url);
-        }
         $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
         $validationResult = ValidationResult::create();
@@ -199,6 +187,30 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
     }
 
     /**
+     * Check if the yubikey is unique and linked to the member trying to logon
+     *
+     * @param  Member $member
+     * @param  string $yubiFingerprint
+     * @param ValidationResult $validationResult
+     * @return void
+     */
+    public function validateToken(Member $member, $yubiFingerprint, ValidationResult &$validationResult)
+    {
+        /** @var DataList|Member[] $yubikeyMembers */
+        $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
+
+        /** @var ValidationResult $validationResult */
+        $validationResult = ValidationResult::create();
+
+        $this->validateMemberCount($member, $yubikeyMembers, $validationResult);
+        // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong
+        $this->validateMemberID($member, $yubikeyMembers, $validationResult);
+
+        // If the member has a yubikey ID set, compare it to the fingerprint.
+        $this->validateFingerprint($member, $yubiFingerprint, $validationResult);
+    }
+
+    /**
      * @param Member $member
      * @param DataList|Member[] $yubikeyMembers
      * @param ValidationResult $validationResult
@@ -232,6 +244,23 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
         }
     }
 
+    /**
+     * @param Member $member
+     * @param $fingerPrint
+     * @param ValidationResult $validationResult
+     */
+    protected function validateFingerprint(Member $member, $fingerPrint, ValidationResult $validationResult)
+    {
+        if ($member->Yubikey && strpos($fingerPrint, $member->Yubikey) !== 0) {
+            $member->registerFailedLogin();
+            $validationResult->addError(
+                _t(
+                    self::class . '.NOMATCH',
+                    'Yubikey fingerprint does not match found member'
+                )
+            );
+        }
+    }
 
     /**
      * Update the member to forcefully enable YubiAuth
@@ -257,22 +286,19 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
         $member->write();
     }
 
+    /**
+     * @return Validate
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
 
     /**
-     * @param Member $member
-     * @param $fingerPrint
-     * @param ValidationResult $validationResult
+     * @param Validate $service
      */
-    protected function validateFingerprint(Member $member, $fingerPrint, ValidationResult $validationResult)
+    public function setService($service)
     {
-        if ($member->Yubikey && strpos($fingerPrint, $member->Yubikey) !== 0) {
-            $member->registerFailedLogin();
-            $validationResult->addError(
-                _t(
-                    self::class . '.NOMATCH',
-                    'Yubikey fingerprint does not match found member'
-                )
-            );
-        }
+        $this->service = $service;
     }
 }

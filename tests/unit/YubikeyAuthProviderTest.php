@@ -126,6 +126,30 @@ class YubikeyAuthProviderTest extends SapphireTest
         $this->assertTrue($this->result->isValid());
     }
 
+    public function testSingleHost()
+    {
+        Config::modify()->set(YubikeyAuthProvider::class, 'AuthURL', 'localhost');
+
+        /** @var YubikeyAuthProvider $provider */
+        $provider = Injector::inst()->get(YubikeyAuthProvider::class);
+
+        $url = $provider->getService()->getHost();
+
+        $this->assertEquals('localhost', $url);
+    }
+
+    public function testHost()
+    {
+        Config::modify()->set(YubikeyAuthProvider::class, 'AuthURL', ['localhost-1', 'localhost-2']);
+
+        /** @var YubikeyAuthProvider $provider */
+        $provider = Injector::inst()->get(YubikeyAuthProvider::class);
+
+        $url = $provider->getService()->getHost();
+
+        $this->assertContains('localhost', $url);
+    }
+
     protected function setUp()
     {
         $this->provider = Injector::inst()->get(YubikeyAuthProvider::class);
