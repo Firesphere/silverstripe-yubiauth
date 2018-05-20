@@ -2,7 +2,6 @@
 
 namespace Firesphere\YubiAuth\Extensions;
 
-use Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\ORM\DataExtension;

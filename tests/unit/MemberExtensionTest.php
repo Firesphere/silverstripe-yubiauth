@@ -25,8 +25,8 @@ class MemberExtensionTest extends SapphireTest
         $extension->updateFieldLabels($labels);
 
         $expected = [
-            'Yubikey'         => 'Yubikey code',
-            'NoYubikeyCount'  => 'Login count without yubikey',
+            'Yubikey'        => 'Yubikey code',
+            'NoYubikeyCount' => 'Login count without yubikey',
         ];
 
         $this->assertEquals($expected, $labels);
