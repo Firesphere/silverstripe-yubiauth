@@ -41,4 +41,17 @@ class MemberExtensionTest extends SapphireTest
         $this->assertInstanceOf(NumericField::class, $fields->dataFieldByName('NoYubikeyCount'));
         $this->assertNull($fields->dataFieldByName('Yubikey'));
     }
+
+    public function testOnBeforeWrite()
+    {
+        /** @var Member $member */
+        $member = Member::create();
+        $member->Yubikey = '1234567890';
+        $member->MFAEnabled = false;
+        $id = $member->write();
+
+        $member = Member::get()->byID($id);
+
+        $this->assertEquals('', $member->Yubikey);
+    }
 }
