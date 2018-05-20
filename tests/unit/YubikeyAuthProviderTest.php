@@ -21,7 +21,7 @@ class YubikeyAuthProviderTest extends SapphireTest
 
     public function testSetService()
     {
-        $service = Injector::inst()->get(Validate::class);
+        $service = Injector::inst()->createWithArgs(Validate::class, ['test', 'test']);
 
         $this->provider->setService($service);
 
