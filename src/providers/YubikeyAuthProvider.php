@@ -145,13 +145,10 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      * @param ValidationResult $validationResult
      * @return ValidationResult|Member
      */
-    private function authenticateYubikey($data, $member, ValidationResult &$validationResult = null)
+    private function authenticateYubikey($data, $member, ValidationResult $validationResult)
     {
         $yubiCode = QwertyConvertor::convertString($data['yubiauth']);
         $yubiFingerprint = substr($yubiCode, 0, -32);
-        if (!$validationResult) {
-            $validationResult = ValidationResult::create();
-        }
 
         if ($member->Yubikey) {
             $this->validateToken($member, $yubiFingerprint, $validationResult);
@@ -193,13 +190,10 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
      * @param ValidationResult $validationResult
      * @return void
      */
-    public function validateToken(Member $member, $yubiFingerprint, ValidationResult &$validationResult)
+    public function validateToken(Member $member, $yubiFingerprint, ValidationResult $validationResult)
     {
         /** @var DataList|Member[] $yubikeyMembers */
         $yubikeyMembers = Member::get()->filter(['Yubikey' => $yubiFingerprint]);
-
-        /** @var ValidationResult $validationResult */
-        $validationResult = ValidationResult::create();
 
         $this->validateMemberCount($member, $yubikeyMembers, $validationResult);
         // Yubikeys have a unique fingerprint, if we find a different member with this yubikey ID, something's wrong

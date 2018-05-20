@@ -104,21 +104,6 @@ class YubikeyAuthProviderTest extends SapphireTest
         $this->assertFalse($this->result->isValid());
     }
 
-    public function testvalidateTokenResultSet()
-    {
-        $member1 = Member::create([
-            'Email'      => 'user' . uniqid('', false) . '1@example.com',
-            'Yubikey'    => 'abcdefghij',
-        ]);
-        $member1->write();
-
-        $result = null;
-        $this->provider->validateToken($member1, '1234567890', $result);
-
-        $this->assertInstanceOf(ValidationResult::class, $result);
-        $this->assertFalse($result->isValid());
-    }
-
     public function testvalidateTokenUnique()
     {
         $member1 = Member::create([
