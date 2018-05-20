@@ -7,6 +7,10 @@ use LogicException;
 use SilverStripe\Core\Environment;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 
+/**
+ * Class YubikeyLoginForm
+ * @package Firesphere\YubiAuth\Forms
+ */
 class YubikeyLoginForm extends BootstrapMFALoginForm
 {
 
@@ -46,6 +50,6 @@ class YubikeyLoginForm extends BootstrapMFALoginForm
      */
     public function getAuthenticatorName()
     {
-        return _t('YubikeyLoginForm.TITLE', 'Yubikey Login');
+        return _t(self::class . '.TITLE', 'Yubikey Login');
     }
 }

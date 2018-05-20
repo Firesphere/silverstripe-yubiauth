@@ -2,6 +2,7 @@
 
 namespace Firesphere\YubiAuth\Extensions;
 
+use Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\ORM\DataExtension;
@@ -11,7 +12,7 @@ use SilverStripe\ORM\DataExtension;
  *
  * Enable yubikey authentication disabling temporarily
  *
- * @property \Firesphere\YubiAuth\Extensions\MemberExtension $owner
+ * @property MemberExtension $owner
  * @property string $Yubikey
  * @property int $NoYubikeyCount
  */
@@ -28,8 +29,8 @@ class MemberExtension extends DataExtension
      */
     public function updateFieldLabels(&$labels)
     {
-        $labels['Yubikey'] = _t('YubikeyAuthenticator.YUBIKEY', 'Yubikey code');
-        $labels['NoYubikeyCount'] = _t('YubikeyAuthenticator.NOYUBIKEYCOUNT', 'Login count without yubikey');
+        $labels['Yubikey'] = _t(self::class . '.YUBIKEY', 'Yubikey code');
+        $labels['NoYubikeyCount'] = _t(self::class . '.NOYUBIKEYCOUNT', 'Login count without yubikey');
     }
 
     /**

@@ -62,7 +62,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
      */
     public static function get_name()
     {
-        return _t('YubikeyAuthenticator.TITLE', 'Yubikey 2 factor login');
+        return _t(self::class . '.TITLE', 'Yubikey 2 factor login');
     }
 
     /**
@@ -127,7 +127,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             return $this->checkYubikey($data, $member);
         }
 
-        $validationResult->addError(_t(__CLASS__ . '.MEMBERNOTFOUND', 'Could not identify member'));
+        $validationResult->addError(_t(self::class . '.MEMBERNOTFOUND', 'Could not identify member'));
 
         return $validationResult;
     }
@@ -219,7 +219,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             return $validationResult;
         }
 
-        $validationResult->addError(_t('YubikeyAuthenticator.ERROR', 'Yubikey authentication error'));
+        $validationResult->addError(_t(self::class . '.ERROR', 'Yubikey authentication error'));
         $member->registerFailedLogin();
 
         return $validationResult;

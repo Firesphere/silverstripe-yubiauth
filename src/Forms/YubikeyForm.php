@@ -10,8 +10,17 @@ use SilverStripe\Forms\PasswordField;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Security\LoginForm;
 
+/**
+ * Class YubikeyForm
+ * @package Firesphere\YubiAuth\Forms
+ */
 class YubikeyForm extends LoginForm
 {
+    /**
+     * YubikeyForm constructor.
+     * @param RequestHandler|null $controller
+     * @param string $name
+     */
     public function __construct(
         RequestHandler $controller = null,
         $name = self::DEFAULT_NAME
@@ -24,11 +33,17 @@ class YubikeyForm extends LoginForm
         parent::__construct($controller, $name, $fields, $actions, $validator);
     }
 
+    /**
+     * @return FieldList|static
+     */
     public function getFormFields()
     {
         $fields = FieldList::create(
             [
-                PasswordField::create('yubiauth', 'Yubikey second factor authentication')
+                PasswordField::create(
+                    'yubiauth',
+                    _t(self::class . '.YUBIKEYSECONDFACTORFIELD', 'Yubikey second factor authentication')
+                )
             ]
         );
         $backURL = $this->controller->getRequest()->getVar('BackURL');
@@ -39,19 +54,25 @@ class YubikeyForm extends LoginForm
         return $fields;
     }
 
+    /**
+     * @return FieldList|static
+     */
     public function getFormActions()
     {
         $action = FieldList::create(
             [
-                FormAction::create('validateToken', 'Validate')
+                FormAction::create('validateToken', _t(self::class . '.VALIDATE', 'Validate'))
             ]
         );
 
         return $action;
     }
 
+    /**
+     * @return string
+     */
     public function getAuthenticatorName()
     {
-        return _t('YubikeyForm.TITLE', 'Yubikey authentication');
+        return _t(self::class . '.TITLE', 'Yubikey authentication');
     }
 }

@@ -6,10 +6,13 @@ use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
 use Firesphere\YubiAuth\Forms\YubikeyForm;
 use Firesphere\YubiAuth\Forms\YubikeyLoginForm;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\Form;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\LoginForm;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
+use SilverStripe\Security\PasswordEncryptor_NotFoundException;
 use SilverStripe\Security\Security;
 
 /**
@@ -17,11 +20,17 @@ use SilverStripe\Security\Security;
  */
 class YubikeyLoginHandler extends BootstrapMFALoginHandler
 {
+    /**
+     * @var array
+     */
     private static $url_handlers = [
         'yubikey-authentication' => 'secondFactor',
         'verify'                 => 'secondFactor'
     ];
 
+    /**
+     * @var array
+     */
     private static $allowed_actions = [
         'LoginForm',
         'dologin',
@@ -46,7 +55,7 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
      * @param array $data
      * @param LoginForm|MemberLoginForm $form
      * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
+     * @return HTTPResponse
      */
     public function doLogin($data, MemberLoginForm $form, HTTPRequest $request)
     {
@@ -92,9 +101,9 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
      * @param array $data
      * @param YubikeyForm $form
      * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
-     * @throws \SilverStripe\ORM\ValidationException
-     * @throws \SilverStripe\Security\PasswordEncryptor_NotFoundException
+     * @return HTTPResponse
+     * @throws ValidationException
+     * @throws PasswordEncryptor_NotFoundException
      */
     public function validateToken($data, $form, $request)
     {
@@ -114,7 +123,7 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
             $memberData = $session->get(BootstrapMFALoginHandler::SESSION_KEY . '.Data');
             $this->performLogin($member, $memberData, $request);
             Security::setCurrentUser($member);
-            $session->clear('YubikeyLoginHandler');
+            $session->clear(BootstrapMFALoginHandler::SESSION_KEY);
 
             return $this->redirectAfterSuccessfulLogin();
         }

@@ -46,7 +46,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
             $validationResult = ValidationResult::create();
             $validationResult->addError(
                 _t(
-                    'YubikeyAuthenticator.ERRORMAXYUBIKEY',
+                    self::class . '.ERRORMAXYUBIKEY',
                     'Maximum login without yubikey exceeded'
                 )
             );
@@ -77,7 +77,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
             $validationResult = ValidationResult::create();
             $validationResult->addError(
                 _t(
-                    'YubikeyAuthenticator.ERRORMAXYUBIKEYDAYS',
+                    self::class . '.ERRORMAXYUBIKEYDAYS',
                     'Maximum days without yubikey exceeded'
                 )
             );
@@ -128,7 +128,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
         if ($yubikeyMembers->count() > 1) {
             $validationResult->addError(
                 _t(
-                    'YubikeyAuthenticator.DUPLICATE',
+                    self::class . '.DUPLICATE',
                     'Yubikey is duplicate, contact your administrator as soon as possible!'
                 )
             );
@@ -144,7 +144,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
     protected function validateMemberID(Member $member, DataList $yubikeyMembers, ValidationResult $validationResult)
     {
         if ((int)$yubikeyMembers->count() === 1 && (int)$yubikeyMembers->first()->ID !== (int)$member->ID) {
-            $validationResult->addError(_t('YubikeyAuthenticator.NOMATCHID', 'Yubikey does not match found member ID'));
+            $validationResult->addError(_t(self::class . '.NOMATCHID', 'Yubikey does not match found member ID'));
             $member->registerFailedLogin();
         }
     }
@@ -160,7 +160,7 @@ class YubikeyAuthProvider extends BootstrapMFAProvider implements MFAProvider
             $member->registerFailedLogin();
             $validationResult->addError(
                 _t(
-                    'YubikeyAuthenticator.NOMATCH',
+                    self::class . '.NOMATCH',
                     'Yubikey fingerprint does not match found member'
                 )
             );
