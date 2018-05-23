@@ -1,4 +1,5 @@
 <?php
+
 namespace Firesphere\YubiAuth;
 
 /**
@@ -39,6 +40,7 @@ class QwertyConvertor
         if (strpos($yubiString, 'jjjjjj') === 0) {
             return self::convertToQwerty($yubiString, 'dvorak');
         }
+
         return $yubiString;
     }
 
@@ -54,10 +56,10 @@ class QwertyConvertor
         $qwerty = str_split(self::$qwerty);
         $from = str_split(self::$$from);
         $return = '';
-        foreach($originalArray as $item) {
+        foreach ($originalArray as $item) {
             $return .= $qwerty[array_search($item, $from, true)];
         }
+
         return $return;
     }
-
 }

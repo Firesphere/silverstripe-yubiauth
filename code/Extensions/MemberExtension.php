@@ -1,4 +1,5 @@
 <?php
+
 namespace Firesphere\YubiAuth;
 
 use CheckboxField;
@@ -12,24 +13,23 @@ use ReadonlyField;
  * 
  * Enable yubikey authentication disabling temporarily
  *
- * @property Member|MemberExtension $owner
- * @property boolean $YubiAuthEnabled
+ * @property Member|Firesphere\YubiAuth\MemberExtension $owner
  * @property string $Yubikey
  * @property int $NoYubikeyCount
  */
 class MemberExtension extends DataExtension
 {
-
+    /**
+     * @var array
+     */
     private static $db = array(
-        'YubiAuthEnabled' => 'Boolean(true)',
-        'Yubikey'         => 'Varchar(16)',
-        'NoYubikeyCount'  => 'Int'
+        'Yubikey'        => 'Varchar(16)',
+        'NoYubikeyCount' => 'Int'
     );
 
-    private static $defaults = array(
-        'YubiAuthEnabled' => true
-    );
-
+    /**
+     * @var array
+     */
     private static $indexes = array(
         'Yubikey' => 'unique("Yubikey")' // The Yubikey Signature is unique for every Yubikey.
     );
@@ -41,7 +41,7 @@ class MemberExtension extends DataExtension
     public function updateFieldLabels(&$labels)
     {
         parent::updateFieldLabels($labels);
-        $labels['YubiAuthEnabled'] = _t('YubikeyAuthenticator.ENABLED', 'Yubikey Authentication Enabled');
+        $labels['MFAEnabled'] = _t('YubikeyAuthenticator.ENABLED', 'Yubikey Authentication Enabled');
         $labels['Yubikey'] = _t('YubikeyAuthenticator.YUBIKEY', 'Yubikey code');
         $labels['NoYubikeyCount'] = _t('YubikeyAuthenticator.NOYUBIKEYCOUNT', 'Login count without yubikey');
     }
@@ -52,18 +52,24 @@ class MemberExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->addFieldToTab('Root.Main', ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount')));
+        $fields->addFieldToTab(
+            'Root.Main',
+            ReadonlyField::create('NoYubikeyCount', $this->owner->fieldLabel('NoYubikeyCount'))
+        );
         $yubiField = ReadonlyField::create('Yubikey', $this->owner->fieldLabel('Yubikey'));
 
-        $yubiField->setDescription(_t('YubikeyAuthenticator.YUBIKEYDESCRIPTION',
-            'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'));
+        $yubiField->setDescription(_t(
+            'YubikeyAuthenticator.YUBIKEYDESCRIPTION',
+            'Unique identifier string for the Yubikey. Will reset when the Yubikey Authentication is disabled'
+        ));
         $fields->addFieldToTab('Root.Main', $yubiField);
 
-        $yubiAuth = CheckboxField::create('YubiAuthEnabled', $this->owner->FieldLabel('YubiAuthEnabled'));
-        $yubiAuth->setDescription(_t('YubikeyAuthenticator.ENABLEDDESCRIPTION',
-            'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'));
+        $yubiAuth = CheckboxField::create('MFAEnabled', $this->owner->FieldLabel('MFAEnabled'));
+        $yubiAuth->setDescription(_t(
+            'YubikeyAuthenticator.ENABLEDDESCRIPTION',
+            'If the user is new and doesn\'t have a Yubikey yet, you can disable the auth temporarily'
+        ));
         $fields->addFieldToTab('Root.Main', $yubiAuth);
-
     }
 
     /**
@@ -73,9 +79,8 @@ class MemberExtension extends DataExtension
     {
         // Empty the yubikey field on member write, if the yubiauth is not required
         // Maybe the user lost the key? So a new one will be set next time it's logged in with key
-        if (!$this->owner->YubiAuthEnabled) {
+        if (!$this->owner->MFAEnabled) {
             $this->owner->Yubikey = '';
         }
     }
-
 }

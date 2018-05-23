@@ -16,6 +16,7 @@
   "require": {
     "silverstripe/framework": "~3.2",
     "silverstripe/cms": "~3.2",
+    "firesphere/bootstrap3mfa": "dev-master",
     "enygma/yubikey": "dev-master"
   },
   "extra": {

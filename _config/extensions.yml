@@ -1,6 +1,3 @@
 Member:
   extensions:
     - Firesphere\YubiAuth\MemberExtension
-SiteConfig:
-  extensions:
-    - Firesphere\YubiAuth\SiteConfigExtension

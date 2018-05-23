@@ -1,14 +1,27 @@
 <?php
+
 namespace Firesphere\YubiAuth;
 
-use MemberLoginForm;
-use PasswordField;
-use SiteConfig;
+use Exception;
+use Form;
+use Injector;
+use Member;
+use MFAAuthenticator;
+use MFAForm;
+use MFALoginForm;
+use Session;
+use SS_HTTPRequest;
 
-class YubikeyLoginForm extends MemberLoginForm
+class YubikeyLoginForm extends MFALoginForm
 {
-
     protected $authenticator_class = 'Firesphere\\YubiAuth\\YubikeyAuthenticator';
+
+    /**
+     * @var array
+     */
+    private static $allowed_actions = array(
+        'MFAForm',
+    );
 
     /**
      * @inheritdoc
@@ -21,13 +34,41 @@ class YubikeyLoginForm extends MemberLoginForm
         $checkCurrentUser = true
     ) {
         parent::__construct($controller, $name, $fields, $actions, $checkCurrentUser);
-
-        $this->Fields()->insertAfter('Password', PasswordField::create("Yubikey",
-            _t('YubikeyAuthenticater.FORMFIELDNAME', 'Yubikey Authentication')));
-
-        if (!SiteConfig::current_site_config()->RequirePassword) {
-            $this->Fields()->removeByName(array('Password', 'forgotPassword'));
-        }
     }
 
+    /**
+     * Requires to call `doChallenge` as it's FormAction
+     * This action should be implemented on the login form used
+     * @return MFAForm
+     */
+    public function MFAForm()
+    {
+        return YubikeyForm::create($this, __FUNCTION__);
+    }
+
+
+    /**
+     * @param array $data
+     * @param Form $form
+     * @param SS_HTTPRequest $request
+     * @throws Exception
+     */
+    public function doChallenge($data, $form, $request)
+    {
+        $memberID = Session::get(MFAAuthenticator::SESSION_KEY . '.MemberID');
+        /** @var Member $member */
+        $member = Member::get()->byID($memberID);
+        /** @var YubikeyAuthenticator $authenticator */
+        $authenticator = Injector::inst()->get(YubikeyAuthenticator::class);
+        $authenticator->setMember($member);
+        $result = $authenticator->verifyToken($data['Token']);
+        if ($result instanceof Member) {
+            $loginData = Session::get(MFAAuthenticator::SESSION_KEY . '.loginData');
+            $member->logIn(isset($loginData['Remember']));
+            $this->logInUserAndRedirect($loginData);
+        } else {
+            $this->setMessage('2 Factor authentication failed', 'bad');
+            $this->controller->redirect('/Security/Login');
+        }
+    }
 }
