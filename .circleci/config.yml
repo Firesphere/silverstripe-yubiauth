@@ -43,8 +43,8 @@ jobs:
             - v2-cache-{{ checksum "composer.lock" }}-{{ checksum "README.md" }}
             # fallback to using the latest cache if no exact match is found
             - v2-cache-
-      # update, because why not
-      - run: composer update
+      # Install, we don't want a rewrite of the lockfile
+      - run: composer install
       - run: cp -r vendor/silverstripe/recipe-cms/mysite .
       # Save all dependencies to cache
       - save_cache:

@@ -10,6 +10,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\Form;
 use SilverStripe\ORM\ValidationException;
+use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\LoginForm;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
@@ -108,6 +109,7 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
      */
     public function validateToken($data, $form, $request)
     {
+        $validationResult = ValidationResult::create();
         $session = $request->getSession();
 
         $memberData = $session->get(BootstrapMFAAuthenticator::SESSION_KEY . '.Data');
