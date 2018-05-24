@@ -8,7 +8,7 @@
 
 namespace Firesphere\YubiAuth\Tests;
 
-use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
+use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
 use Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator;
 use Firesphere\YubiAuth\Forms\YubikeyForm;
 use Firesphere\YubiAuth\Forms\YubikeyLoginForm;
@@ -76,7 +76,7 @@ class YubikeyLoginHandlerTest extends SapphireTest
             $request
         );
 
-        $data = $request->getSession()->get(BootstrapMFALoginHandler::SESSION_KEY);
+        $data = $request->getSession()->get(BootstrapMFAAuthenticator::SESSION_KEY);
         $this->assertEquals($backURL, $data['BackURL']);
         $this->assertEquals($backURL, $data['Data']['BackURL']);
     }

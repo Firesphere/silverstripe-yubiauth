@@ -3,7 +3,6 @@
 namespace Firesphere\YubiAuth\Authenticators;
 
 use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
-use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
 use Firesphere\YubiAuth\Handlers\YubikeyLoginHandler;
 use Firesphere\YubiAuth\Providers\YubikeyAuthProvider;
 use SilverStripe\Control\HTTPRequest;
@@ -99,7 +98,7 @@ class YubikeyMemberAuthenticator extends BootstrapMFAAuthenticator
             $validationResult = ValidationResult::create();
         }
 
-        $memberID = $request->getSession()->get(BootstrapMFALoginHandler::SESSION_KEY . '.MemberID');
+        $memberID = $request->getSession()->get(BootstrapMFAAuthenticator::SESSION_KEY . '.MemberID');
         // First, let's see if we know the member
         /** @var Member|null $member */
         $member = Member::get()->filter(['ID' => $memberID])->first();

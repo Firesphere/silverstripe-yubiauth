@@ -61,10 +61,10 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
     {
         if ($member = $this->checkLogin($data, $request, $result)) {
             $session = $request->getSession();
-            $session->set(BootstrapMFALoginHandler::SESSION_KEY . '.MemberID', $member->ID);
-            $session->set(BootstrapMFALoginHandler::SESSION_KEY . '.Data', $data);
+            $session->set(BootstrapMFAAuthenticator::SESSION_KEY . '.MemberID', $member->ID);
+            $session->set(BootstrapMFAAuthenticator::SESSION_KEY . '.Data', $data);
             if (!empty($data['BackURL'])) {
-                $session->set(BootstrapMFALoginHandler::SESSION_KEY . '.BackURL', $data['BackURL']);
+                $session->set(BootstrapMFAAuthenticator::SESSION_KEY . '.BackURL', $data['BackURL']);
             }
 
             return $this->redirect($this->link('yubikey-authentication'));
@@ -109,7 +109,7 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
     {
         $session = $request->getSession();
 
-        $memberData = $session->get(BootstrapMFALoginHandler::SESSION_KEY . '.Data');
+        $memberData = $session->get(BootstrapMFAAuthenticator::SESSION_KEY . '.Data');
         $this->request['BackURL'] = !empty($memberData['BackURL']) ? $memberData['BackURL'] : '';
 
         $member = $this->authenticator->validateToken($data, $request, $validationResult);
@@ -120,10 +120,10 @@ class YubikeyLoginHandler extends BootstrapMFALoginHandler
         }
 
         if ($member instanceof Member) {
-            $memberData = $session->get(BootstrapMFALoginHandler::SESSION_KEY . '.Data');
+            $memberData = $session->get(BootstrapMFAAuthenticator::SESSION_KEY . '.Data');
             $this->performLogin($member, $memberData, $request);
             Security::setCurrentUser($member);
-            $session->clear(BootstrapMFALoginHandler::SESSION_KEY);
+            $session->clear(BootstrapMFAAuthenticator::SESSION_KEY);
 
             return $this->redirectAfterSuccessfulLogin();
         }

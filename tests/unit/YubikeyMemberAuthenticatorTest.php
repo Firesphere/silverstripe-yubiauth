@@ -2,7 +2,7 @@
 
 namespace Firesphere\YubiAuth\Tests;
 
-use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
+use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
 use Firesphere\YubiAuth\Authenticators\YubikeyMemberAuthenticator;
 use Firesphere\YubiAuth\Forms\YubikeyForm;
 use Firesphere\YubiAuth\Forms\YubikeyLoginForm;
@@ -279,7 +279,7 @@ class YubikeyMemberAuthenticatorTest extends SapphireTest
             $request
         );
         $session = $request->getSession();
-        $session->set(BootstrapMFALoginHandler::SESSION_KEY . '.MemberID', -100);
+        $session->set(BootstrapMFAAuthenticator::SESSION_KEY . '.MemberID', -100);
         $request->setSession($session);
 
         $this->authenticator->validateToken(

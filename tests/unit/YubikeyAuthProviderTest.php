@@ -58,18 +58,18 @@ class YubikeyAuthProviderTest extends SapphireTest
         $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
-            'Yubikey'    => '1234567890',
+            'Yubikey'    => 'ccccccfinfgr',
             'MFAEnabled' => true
         ]);
         $member1->write();
         $member2 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '2@example.com',
-            'Yubikey'    => '1234567890',
+            'Yubikey'    => 'ccccccfinfgr',
             'MFAEnabled' => true
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, '1234567890', $result);
+        $this->provider->validateToken($member1, 'ccccccfinfgr', $result);
 
         $this->assertInstanceOf(ValidationResult::class, $result);
         $this->assertFalse($result->isValid());
@@ -80,18 +80,18 @@ class YubikeyAuthProviderTest extends SapphireTest
         $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
-            'Yubikey'    => '0987654321',
+            'Yubikey'    => 'ccccccfinfgp',
             'MFAEnabled' => true
         ]);
         $member1->write();
         $member2 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '2@example.com',
-            'Yubikey'    => '1234567890',
+            'Yubikey'    => 'ccccccfinfgr',
             'MFAEnabled' => true
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, '1234567890', $result);
+        $this->provider->validateToken($member1, 'ccccccfinfgr', $result);
 
         $this->assertInstanceOf(ValidationResult::class, $result);
         $this->assertFalse($result->isValid());
@@ -102,7 +102,7 @@ class YubikeyAuthProviderTest extends SapphireTest
         $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
-            'Yubikey'    => 'abcdefghij',
+            'Yubikey'    => 'ccccccfinfgr',
             'MFAEnabled' => true
         ]);
         $member1->write();
@@ -118,18 +118,18 @@ class YubikeyAuthProviderTest extends SapphireTest
         $result = Injector::inst()->get(ValidationResult::class, false);
         $member1 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '1@example.com',
-            'Yubikey'    => 'abcdefghij',
+            'Yubikey'    => 'ccccccfinfgr',
             'MFAEnabled' => true
         ]);
         $member1->write();
         $member2 = Member::create([
             'Email'      => 'user' . uniqid('', false) . '2@example.com',
-            'Yubikey'    => '1234567890',
+            'Yubikey'    => 'ccccccfinfgp',
             'MFAEnabled' => true
         ]);
         $member2->write();
 
-        $this->provider->validateToken($member1, 'abcdefghij', $result);
+        $this->provider->validateToken($member1, 'ccccccfinfgr', $result);
 
         $this->assertInstanceOf(ValidationResult::class, $result);
         $this->assertTrue($result->isValid());
@@ -157,6 +157,47 @@ class YubikeyAuthProviderTest extends SapphireTest
         $url = $provider->getService()->getHost();
 
         $this->assertContains('localhost', $url);
+    }
+
+    public function testCheckYubikeyFalse()
+    {
+        $key = 'ccccccfinfgrtjhdeitnirlnggbicvnnthethdljlcvl';
+        $result = Injector::inst()->get(ValidationResult::class, false);
+        $member = Member::create([
+            'Email'      => 'user' . uniqid('', false) . '1@example.com',
+            'Yubikey'    => 'ccccccfinfgr',
+            'MFAEnabled' => true
+        ]);
+        $errorCount = $member->FailedLoginCount;
+        $mockService = new MockYubiValidateFalse('key', 'secret');
+        $this->provider->setService($mockService);
+        $this->provider->checkYubikey(['yubiauth' => $key], $member, $result);
+
+        $this->assertFalse($result->isValid());
+        $this->assertGreaterThan($errorCount, $member->FailedLoginCount);
+        $messages = $result->getMessages();
+        $this->assertEquals('Yubikey authentication error', $messages[0]['message']);
+    }
+
+    public function testException()
+    {
+        $key = 'ccccccfinfgrtjhdeitnirlnggbicvnnthethdljlcvl';
+        $result = Injector::inst()->get(ValidationResult::class, false);
+        $member = Member::create([
+            'Email'      => 'user' . uniqid('', false) . '1@example.com',
+            'Yubikey'    => 'ccccccfinfgr',
+            'MFAEnabled' => true
+        ]);
+        $errorCount = $member->FailedLoginCount;
+        $mockService = new MockYubiValidateException('key', 'secret');
+        $this->provider->setService($mockService);
+        $this->provider->checkYubikey(['yubiauth' => $key], $member, $result);
+
+        $this->assertFalse($result->isValid());
+        $this->assertGreaterThan($errorCount, $member->FailedLoginCount);
+        $messages = $result->getMessages();
+        $this->assertEquals('I do not like this', $messages[0]['message']);
+
     }
 
     protected function setUp()
