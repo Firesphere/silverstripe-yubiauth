@@ -2,6 +2,7 @@
 
 namespace Firesphere\YubiAuth\Handlers;
 
+use Firesphere\BootstrapMFA\Authenticators\BootstrapMFAAuthenticator;
 use Firesphere\BootstrapMFA\Handlers\BootstrapMFALoginHandler;
 use Firesphere\YubiAuth\Forms\YubikeyForm;
 use Firesphere\YubiAuth\Forms\YubikeyLoginForm;
